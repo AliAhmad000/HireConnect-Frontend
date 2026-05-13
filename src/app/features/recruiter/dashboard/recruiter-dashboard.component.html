@@ -1,0 +1,236 @@
+<div class="hc-page">
+  <div class="hc-page-header">
+    <div>
+      <span class="hc-eyebrow">Recruiter workspace</span>
+      <h1>Hiring operations dashboard</h1>
+      <p>Monitor roles, pipeline volume, subscription usage, and reschedule requests from one remapped dashboard.</p>
+    </div>
+    <a routerLink="/recruiter/post-job" class="btn-primary">
+      <span class="material-symbols-rounded">add</span>
+      Post a new job
+    </a>
+  </div>
+
+  <section class="hc-card-grid hc-card-grid--4">
+    <article class="summary-card hc-glass" *ngIf="analytics">
+      <span>Total jobs</span>
+      <strong>{{ analytics.totalJobs }}</strong>
+      <small class="hc-trend">{{ activeJobsCount }} active</small>
+    </article>
+    <article class="summary-card hc-glass" *ngIf="analytics">
+      <span>Total applications</span>
+      <strong>{{ analytics.totalApplications }}</strong>
+      <small class="hc-trend">{{ analytics.viewToApplyRatio }}% conversion</small>
+    </article>
+    <article class="summary-card hc-glass" *ngIf="analytics">
+      <span>Shortlisted</span>
+      <strong>{{ analytics.shortlistedCount }}</strong>
+      <small class="hc-trend">Active candidate movement</small>
+    </article>
+    <article class="summary-card hc-glass" *ngIf="analytics">
+      <span>Average time to hire</span>
+      <strong>{{ analytics.avgTimeToHireDays }}</strong>
+      <small class="hc-trend">Days</small>
+    </article>
+  </section>
+
+  <section class="hc-section hc-glass" *ngIf="currentSubscription">
+    <div class="hc-page-header">
+      <div>
+        <span class="hc-eyebrow">Subscription</span>
+        <h2>{{ currentSubscription.plan }}</h2>
+        <p>{{ activeJobsCount }} active jobs used from {{ currentSubscription.maxJobPosts || 3 }} allowed posts.</p>
+      </div>
+      <span class="status-badge" [ngClass]="{ 'ACTIVE': currentSubscription.status === 'ACTIVE', 'PAUSED': currentSubscription.status !== 'ACTIVE' }">
+        {{ currentSubscription.status }}
+      </span>
+    </div>
+    <div class="hc-stat-row">
+      <span><span class="material-symbols-rounded">monitoring</span>{{ getSubscriptionUsagePercent() }}% usage</span>
+      <a routerLink="/recruiter/subscription" class="btn-outline-sm">Manage billing</a>
+    </div>
+  </section>
+
+  <div class="hc-split">
+    <section class="hc-section hc-glass">
+      <div class="section-header">
+        <div>
+          <h2>Quick actions</h2>
+          <p>Move to the most common recruiter tasks.</p>
+        </div>
+      </div>
+      <div class="category-grid">
+        <a *ngFor="let action of quickActions" [routerLink]="action.route" class="category-card hc-glass">
+          <span class="material-symbols-rounded">{{ action.icon }}</span>
+          <strong>{{ action.label }}</strong>
+        </a>
+      </div>
+    </section>
+
+    <section class="hc-section hc-glass" *ngIf="analytics">
+      <div class="section-header">
+        <div>
+          <h2>Pipeline summary</h2>
+          <p>High-level view of where candidates are moving.</p>
+        </div>
+      </div>
+      <div class="hc-feed">
+        <div class="hc-list-card hc-glass">
+          <strong>Applied</strong>
+          <p>{{ analytics.totalApplications }}</p>
+        </div>
+        <div class="hc-list-card hc-glass">
+          <strong>Shortlisted</strong>
+          <p>{{ analytics.shortlistedCount }}</p>
+        </div>
+        <div class="hc-list-card hc-glass">
+          <strong>Time to hire</strong>
+          <p>{{ analytics.avgTimeToHireDays }} days</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="hc-section hc-glass">
+    <div class="section-header">
+      <div>
+        <h2>Active job postings</h2>
+        <p>Live jobs and application volume in one place.</p>
+      </div>
+      <a routerLink="/recruiter/jobs" class="btn-outline">View all jobs</a>
+    </div>
+
+    <div class="hc-feed" *ngIf="!isLoading && activeJobs.length; else noActiveJobs">
+      <article class="job-card hc-glass" *ngFor="let job of activeJobs">
+        <div class="hc-page-header">
+          <div>
+            <h3>{{ job.title }}</h3>
+            <p>Posted {{ job.postedAt | date:'MMM d, y' }}</p>
+          </div>
+          <span class="status-badge" [ngClass]="{
+            'ACTIVE': job.status === 'ACTIVE',
+            'PAUSED': job.status === 'PAUSED',
+            'CLOSED': job.status === 'CLOSED'
+          }">{{ job.status }}</span>
+        </div>
+        <div class="hc-stat-row">
+          <span><span class="material-symbols-rounded">groups</span>{{ job.applicationsCount || 0 }} applications</span>
+        </div>
+        <a [routerLink]="['/recruiter/jobs', job.jobId]" class="btn-primary-sm">Manage job</a>
+      </article>
+    </div>
+
+    <ng-template #noActiveJobs>
+      <div class="empty-state" *ngIf="!isLoading">
+        <p>You don't have any active job postings.</p>
+        <a routerLink="/recruiter/post-job" class="btn-primary">Post your first job</a>
+      </div>
+    </ng-template>
+  </section>
+
+  <section class="hc-section hc-glass" *ngIf="!isLoading && pendingRescheduleRequests.length > 0">
+    <div class="section-header">
+      <div>
+        <h2>Reschedule requests</h2>
+        <p>Candidate requests waiting for your decision.</p>
+      </div>
+      <span class="status-badge PAUSED">{{ pendingRescheduleRequests.length }} pending</span>
+    </div>
+
+    <div class="hc-feed">
+      <article class="interview-card hc-glass" *ngFor="let interview of pendingRescheduleRequests">
+        <div class="hc-page-header">
+          <div>
+            <h3>{{ interview.candidateName || 'Candidate' }}</h3>
+            <p>{{ interview.jobTitle || 'Interview' }}<span *ngIf="interview.companyName"> at {{ interview.companyName }}</span></p>
+          </div>
+        </div>
+
+        <div class="hc-stat-row">
+          <span><span class="material-symbols-rounded">event</span>{{ interview.scheduledAt | date:'MMM d, y, h:mm a' }}</span>
+          <span><span class="material-symbols-rounded">update</span>{{ interview.requestedScheduledAt | date:'MMM d, y, h:mm a' }}</span>
+        </div>
+        <p class="muted" *ngIf="interview.rescheduleReason"><strong>Reason:</strong> {{ interview.rescheduleReason }}</p>
+
+        <form class="hc-form-grid" *ngIf="reschedulingInterviewId === interview.interviewId" (ngSubmit)="submitDashboardReschedule(interview)">
+          <label class="hc-field">
+            New date and time
+            <input type="datetime-local" name="newScheduledAt-{{ interview.interviewId }}" [(ngModel)]="rescheduleForm.newScheduledAt" [min]="getMinimumDateTime()" required>
+          </label>
+          <label class="hc-field">
+            Meeting link
+            <input type="url" name="meetLink-{{ interview.interviewId }}" [(ngModel)]="rescheduleForm.meetLink" placeholder="https://">
+          </label>
+          <label class="hc-field">
+            Location
+            <input type="text" name="location-{{ interview.interviewId }}" [(ngModel)]="rescheduleForm.location">
+          </label>
+          <label class="hc-field">
+            Note
+            <input type="text" name="reason-{{ interview.interviewId }}" [(ngModel)]="rescheduleForm.rescheduleReason">
+          </label>
+          <p class="error-message full-width" *ngIf="rescheduleError">{{ rescheduleError }}</p>
+          <div class="form-actions full-width">
+            <button type="button" class="btn-outline" (click)="closeDashboardRescheduler()">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="isProcessingAction">Save New Time</button>
+          </div>
+        </form>
+
+        <div class="action-buttons">
+          <button type="button" class="btn-primary-sm" (click)="openDashboardRescheduler(interview)" [disabled]="isProcessingAction">Reschedule</button>
+          <button type="button" class="btn-action danger" (click)="rejectDashboardReschedule(interview)" [disabled]="isProcessingAction">Decline</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="hc-section hc-glass">
+    <div class="section-header">
+      <div>
+        <h2>Recent applications</h2>
+        <p>Candidate review now sits in a simplified table with cleaner action priority.</p>
+      </div>
+      <a routerLink="/recruiter/applications" class="btn-outline">View all</a>
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table *ngIf="recentApplications.length > 0">
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Role</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let app of recentApplications">
+            <td>{{ getCandidateName(app) }}</td>
+            <td>{{ getJobTitle(app) }}</td>
+            <td>{{ app.appliedAt | date:'MMM d, y' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="{
+                'APPLIED': app.status === 'APPLIED',
+                'SHORTLISTED': app.status === 'SHORTLISTED',
+                'INTERVIEW_SCHEDULED': app.status === 'INTERVIEW_SCHEDULED',
+                'OFFERED': app.status === 'OFFERED',
+                'REJECTED': app.status === 'REJECTED' || app.status === 'WITHDRAWN'
+              }">{{ app.status }}</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button (click)="shortlistCandidate(app.applicationId)" *ngIf="app.status === 'APPLIED'" class="btn-outline-sm">Shortlist</button>
+                <button (click)="downloadResume(app)" class="btn-outline-sm">Resume</button>
+                <a [routerLink]="['/recruiter/applications', app.applicationId]" class="btn-primary-sm">Review</a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="empty-state" *ngIf="recentApplications.length === 0">
+        <p>No applications received yet.</p>
+      </div>
+    </div>
+  </section>
+</div>

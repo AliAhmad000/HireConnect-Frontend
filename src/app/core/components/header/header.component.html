@@ -1,0 +1,104 @@
+<header class="shell-header">
+  <div class="shell-header__bar">
+    <div class="shell-header__brand">
+      <a *ngIf="isLogoClickable()" [routerLink]="getLogoLink()" class="brand-link" [attr.aria-label]="'HireConnect ' + getRoleLabel()">
+        <span class="brand-mark">H</span>
+        <span class="brand-copy">
+          <strong>HireConnect</strong>
+          <small>{{ getRoleLabel() }}</small>
+        </span>
+      </a>
+      <span *ngIf="!isLogoClickable()" class="brand-link" [attr.aria-label]="'HireConnect ' + getRoleLabel()">
+        <span class="brand-mark">H</span>
+        <span class="brand-copy">
+          <strong>HireConnect</strong>
+          <small>{{ getRoleLabel() }}</small>
+        </span>
+      </span>
+    </div>
+
+    <nav class="shell-header__nav" aria-label="Primary">
+      <a
+        *ngFor="let link of desktopLinks"
+        [routerLink]="link.route"
+        routerLinkActive="is-active"
+        [class.is-primary]="link.primary">
+        {{ link.label }}
+      </a>
+    </nav>
+
+    <div class="shell-header__actions">
+      <ng-container *ngIf="currentUser">
+        <button type="button" class="shell-icon-button" (click)="toggleNotification()" aria-label="Notifications">
+          <span class="material-symbols-rounded">notifications</span>
+          <span *ngIf="unreadCount > 0" class="shell-icon-badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+        </button>
+
+        <div class="shell-popover" *ngIf="isNotificationOpen">
+          <div class="shell-popover__head">
+            <div>
+              <strong>Notifications</strong>
+              <small>Recent activity</small>
+            </div>
+            <a [routerLink]="getNotificationLink()" (click)="closeDrawers()">Open inbox</a>
+          </div>
+          <div class="shell-popover__list" *ngIf="recentNotifications.length; else emptyNotifications">
+            <a
+              *ngFor="let notification of recentNotifications"
+              [routerLink]="notification.actionUrl || '/notifications'"
+              (click)="closeDrawers()"
+              class="shell-popover__item"
+              [class.is-unread]="!notification.isRead">
+              <span class="material-symbols-rounded">{{ notification.isRead ? 'radio_button_unchecked' : 'radio_button_checked' }}</span>
+              <span>
+                <strong>{{ notification.title }}</strong>
+                <small>{{ notification.message }}</small>
+              </span>
+            </a>
+          </div>
+          <ng-template #emptyNotifications>
+            <div class="shell-popover__empty">No new notifications right now.</div>
+          </ng-template>
+        </div>
+
+        <button type="button" class="profile-chip" (click)="toggleProfileMenu()">
+          <span class="profile-chip__avatar">{{ currentUser.email.charAt(0).toUpperCase() }}</span>
+          <span class="profile-chip__copy">
+            <strong>{{ currentUser.role.toLowerCase() }}</strong>
+            <small>{{ currentUser.email }}</small>
+          </span>
+          <span class="material-symbols-rounded">expand_more</span>
+        </button>
+
+        <div class="shell-popover profile-popover" *ngIf="isProfileMenuOpen">
+          <div class="shell-popover__head">
+            <div>
+              <strong>{{ currentUser.email }}</strong>
+              <small>{{ currentUser.role.toLowerCase() }}</small>
+            </div>
+          </div>
+          <div class="shell-popover__actions">
+            <a [routerLink]="getDashboardLink()" (click)="closeDrawers()">Workspace</a>
+            <a *ngIf="currentUser.role !== 'ADMIN'" [routerLink]="getProfileLink()" (click)="closeDrawers()">Profile</a>
+            <button type="button" (click)="logout()">Sign Out</button>
+          </div>
+        </div>
+      </ng-container>
+
+      <button type="button" class="shell-menu-button" (click)="toggleMenu()" aria-label="Toggle menu">
+        <span class="material-symbols-rounded">{{ isMenuOpen ? 'close' : 'menu' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="shell-mobile-nav" *ngIf="isMenuOpen">
+    <a
+      *ngFor="let link of desktopLinks"
+      [routerLink]="link.route"
+      routerLinkActive="is-active"
+      [class.is-primary]="link.primary"
+      (click)="closeDrawers()">
+      {{ link.label }}
+    </a>
+  </div>
+</header>

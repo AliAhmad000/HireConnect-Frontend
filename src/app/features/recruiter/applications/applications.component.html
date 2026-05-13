@@ -1,0 +1,146 @@
+<div class="applications-container">
+  <div class="page-header">
+    <div>
+      <span class="hc-eyebrow">Candidate review</span>
+      <h1>Applications management</h1>
+      <p>Review every incoming application from a cleaner recruiter command table.</p>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <button type="button" class="stat-item" [class.active]="!filterForm.get('status')?.value" (click)="filterByStatus('')">
+      <span class="stat-count">{{ getApplicationsCount() }}</span>
+      <span class="stat-label">Total</span>
+    </button>
+    <button type="button" class="stat-item" [class.active]="filterForm.get('status')?.value === 'APPLIED'" (click)="filterByStatus('APPLIED')">
+      <span class="stat-count">{{ getApplicationsCount('APPLIED') }}</span>
+      <span class="stat-label">Applied</span>
+    </button>
+    <button type="button" class="stat-item" [class.active]="filterForm.get('status')?.value === 'SHORTLISTED'" (click)="filterByStatus('SHORTLISTED')">
+      <span class="stat-count">{{ getApplicationsCount('SHORTLISTED') }}</span>
+      <span class="stat-label">Shortlisted</span>
+    </button>
+    <button type="button" class="stat-item" [class.active]="filterForm.get('status')?.value === 'INTERVIEW_SCHEDULED'" (click)="filterByStatus('INTERVIEW_SCHEDULED')">
+      <span class="stat-count">{{ getApplicationsCount('INTERVIEW_SCHEDULED') }}</span>
+      <span class="stat-label">Interview</span>
+    </button>
+    <button type="button" class="stat-item" [class.active]="filterForm.get('status')?.value === 'OFFERED'" (click)="filterByStatus('OFFERED')">
+      <span class="stat-count">{{ getApplicationsCount('OFFERED') }}</span>
+      <span class="stat-label">Offered</span>
+    </button>
+    <button type="button" class="stat-item" [class.active]="filterForm.get('status')?.value === 'REJECTED'" (click)="filterByStatus('REJECTED')">
+      <span class="stat-count">{{ getApplicationsCount('REJECTED') }}</span>
+      <span class="stat-label">Rejected</span>
+    </button>
+  </div>
+
+  <section class="hc-section hc-glass">
+    <form [formGroup]="filterForm" class="hc-form-grid hc-form-grid--4">
+      <label class="hc-field full-width">
+        Search
+        <input type="text" formControlName="search" placeholder="Search by candidate, email, or role...">
+      </label>
+      <label class="hc-field">
+        Job
+        <select formControlName="jobId">
+          <option value="">All Jobs</option>
+          <option *ngFor="let job of jobs" [value]="job.jobId">{{ job.title }}</option>
+        </select>
+      </label>
+      <label class="hc-field">
+        Status
+        <select formControlName="status">
+          <option value="">All Status</option>
+          <option *ngFor="let status of statuses" [value]="status">{{ status.replace('_', ' ') }}</option>
+        </select>
+      </label>
+      <div class="form-actions">
+        <button type="button" class="btn-outline" (click)="resetFilters()">Reset</button>
+      </div>
+    </form>
+  </section>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading applications...</p>
+  </div>
+
+  <div class="table-responsive hc-glass" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>Role</th>
+          <th>Applied</th>
+          <th>Skills</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of filteredApplications">
+          <td>
+            <strong>{{ getCandidateName(app) }}</strong><br>
+            <small>{{ getCandidateEmail(app) }}</small>
+          </td>
+          <td><a [routerLink]="['/jobs', app.jobId]">{{ getJobTitle(app) }}</a></td>
+          <td>{{ app.appliedAt | date:'mediumDate' }}</td>
+          <td>
+            <div class="skill-list">
+              <span class="pill" *ngFor="let skill of getCandidateSkills(app).slice(0, 3)">{{ skill }}</span>
+            </div>
+          </td>
+          <td><span class="status-badge" [class]="getStatusClass(app.status)">{{ app.status.replace('_', ' ') }}</span></td>
+          <td>
+            <div class="action-buttons">
+              <a [routerLink]="['/recruiter/applications', app.applicationId]" class="btn-outline-sm">Open</a>
+              <button class="btn-outline-sm" (click)="downloadResume(app)">Resume</button>
+              <button *ngIf="app.status === 'APPLIED'" class="btn-action warning" (click)="shortlistCandidate(app.applicationId)">Shortlist</button>
+              <button *ngIf="canMessageCandidate(app)" class="btn-outline-sm" (click)="openMessagePanel(app)">Message</button>
+              <button *ngIf="app.status !== 'REJECTED' && app.status !== 'OFFERED'" class="btn-action danger" (click)="rejectCandidate(app.applicationId)">Reject</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredApplications.length === 0">
+      <p *ngIf="filterForm.get('status')?.value || filterForm.get('search')?.value || filterForm.get('jobId')?.value">No applications match your current filters.</p>
+      <p *ngIf="!filterForm.get('status')?.value && !filterForm.get('search')?.value && !filterForm.get('jobId')?.value">You haven't received any applications yet.</p>
+    </div>
+  </div>
+
+  <div class="bulk-actions" *ngIf="filteredApplications.length > 0 && !isLoading">
+    <span>{{ filteredApplications.length }} application(s) visible</span>
+    <div class="bulk-buttons">
+      <button type="button" class="btn-outline-sm" (click)="exportCsv()">Export CSV</button>
+      <button type="button" class="btn-outline-sm" (click)="composeBulkEmail()">Send Bulk Email</button>
+    </div>
+  </div>
+
+  <div class="message-overlay" *ngIf="messagePanelApplication">
+    <div class="message-panel hc-glass hc-glass--strong">
+      <div class="message-panel-header">
+        <div>
+          <h2>Message candidate</h2>
+          <p>{{ getCandidateName(messagePanelApplication) }} for {{ getJobTitle(messagePanelApplication) }}</p>
+        </div>
+        <button type="button" class="btn-outline-sm" (click)="closeMessagePanel()" [disabled]="isSendingMessage">Close</button>
+      </div>
+      <label class="hc-field">
+        Message
+        <textarea [(ngModel)]="candidateMessage" rows="5" maxlength="1000" [disabled]="isSendingMessage" placeholder="Write a clear update for the candidate..."></textarea>
+      </label>
+      <p class="message-error" *ngIf="messageError">{{ messageError }}</p>
+      <div class="message-footer">
+        <span>{{ candidateMessage.length }}/1000</span>
+        <div class="action-buttons">
+          <button type="button" class="btn-outline-sm" (click)="closeMessagePanel()" [disabled]="isSendingMessage">Cancel</button>
+          <button type="button" class="btn-primary-sm" (click)="sendMessageToCandidate()" [disabled]="isSendingMessage">
+            {{ isSendingMessage ? 'Sending...' : 'Send Message' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

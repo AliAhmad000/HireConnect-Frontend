@@ -1,0 +1,245 @@
+// src/app/features/recruiter/analytics/analytics.component.scss
+.analytics-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: #666;
+  }
+
+  .btn-export {
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+
+    &:hover {
+      background: #5a6fd8;
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  h3 {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #667eea;
+  }
+}
+
+.job-selector {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  h2 {
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+}
+
+.job-analytics {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  h3 {
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .metric {
+    text-align: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+
+    .label {
+      display: block;
+      color: #666;
+      margin-bottom: 0.25rem;
+    }
+
+    .number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+  }
+
+  .pipeline-stages {
+    .stage {
+      margin-bottom: 1rem;
+
+      .stage-bar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        min-width: max-content;
+        transition: width 0.5s;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Professional recruiter refresh
+.analytics-container {
+  max-width: 1180px;
+  padding: 24px;
+  color: #172033;
+}
+
+.page-header {
+  gap: 16px;
+
+  h1 {
+    color: #111827;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+
+  p {
+    color: #667085;
+  }
+
+  .btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px;
+    background: #2563eb;
+  }
+}
+
+.summary-card,
+.job-selector,
+.job-analytics {
+  border: 1px solid #e5e9f2;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.summary-card {
+  text-align: left;
+
+  h3 {
+    color: #667085;
+    font-weight: 700;
+  }
+
+  .value {
+    color: #111827;
+  }
+}
+
+.job-selector select {
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+}
+
+.job-analytics {
+  .metric {
+    border: 1px solid #eef2f7;
+    background: #fff;
+    text-align: left;
+
+    .number {
+      color: #111827;
+    }
+  }
+
+  .pipeline-stages .stage .stage-bar {
+    background: #2563eb;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 900px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .analytics-container {
+    padding: 16px;
+  }
+
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+}

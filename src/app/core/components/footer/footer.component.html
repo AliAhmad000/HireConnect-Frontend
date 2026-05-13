@@ -1,0 +1,27 @@
+<footer class="shell-footer">
+  <div class="shell-footer__inner">
+    <section class="shell-footer__brand">
+      <div class="brand-mark">H</div>
+      <div>
+        <p class="shell-footer__eyebrow">HireConnect careers</p>
+        <h3>Find roles and manage hiring with clarity.</h3>
+        <p>{{ brandCopy }}</p>
+      </div>
+    </section>
+
+    <nav class="shell-footer__links" aria-label="Footer navigation">
+      <section *ngFor="let section of footerSections">
+        <h4>{{ section.title }}</h4>
+        <a *ngFor="let link of section.links" [routerLink]="link.route">
+          <span class="material-symbols-rounded">{{ link.icon }}</span>
+          <span>{{ link.label }}</span>
+        </a>
+      </section>
+    </nav>
+  </div>
+
+  <div class="shell-footer__bottom">
+    <span>&copy; {{ currentYear }} HireConnect</span>
+    <span>{{ footerTagline }}</span>
+  </div>
+</footer>

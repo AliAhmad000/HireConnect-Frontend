@@ -1,0 +1,130 @@
+<div class="subscription-container">
+  <div class="page-header">
+    <div>
+      <h1>Subscription & Billing</h1>
+      <p>Candidates use HireConnect free. Recruiters can upgrade for higher posting limits and premium tools.</p>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading billing dashboard...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <section class="overview">
+      <div class="current-plan" *ngIf="currentSubscription">
+        <span class="eyebrow">Current plan</span>
+        <div class="plan-line">
+          <h2>{{ currentSubscription.plan }}</h2>
+          <span class="status-badge" [class]="currentSubscription.status.toLowerCase()">
+            {{ currentSubscription.status }}
+          </span>
+        </div>
+        <div class="metrics">
+          <div>
+            <span>Job posts</span>
+            <strong>{{ currentSubscription.maxJobPosts || 3 }}</strong>
+          </div>
+          <div>
+            <span>Renewal</span>
+            <strong>{{ currentSubscription.endDate ? (currentSubscription.endDate | date:'mediumDate') : 'No expiry' }}</strong>
+          </div>
+          <div>
+            <span>Paid</span>
+            <strong>{{ currentSubscription.amountPaid | currency:'INR':'symbol':'1.0-0' }}</strong>
+          </div>
+        </div>
+        <button
+          class="btn-danger"
+          type="button"
+          (click)="cancelSubscription()"
+          *ngIf="currentSubscription.status === 'ACTIVE' && currentSubscription.plan !== 'FREE'">
+          Cancel subscription
+        </button>
+      </div>
+
+      <div class="payment-panel">
+        <span class="eyebrow">Payment method</span>
+        <div class="payment-options">
+          <label *ngFor="let mode of paymentModes" [class.selected]="selectedPaymentMode === mode.value">
+            <input type="radio" name="paymentMode" [value]="mode.value" [(ngModel)]="selectedPaymentMode">
+            <span>{{ mode.label }}</span>
+            <small>{{ mode.hint }}</small>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="available-plans">
+      <h2>Recruiter Plans</h2>
+      <div class="plans-grid">
+        <article class="plan-card" *ngFor="let plan of plans" [class.featured]="plan.plan === 'PROFESSIONAL'">
+          <div class="plan-card-header">
+            <div>
+              <h3>{{ plan.name }}</h3>
+              <p>{{ plan.maxJobPosts }} job posts</p>
+            </div>
+            <span *ngIf="plan.plan === 'PROFESSIONAL'">Popular</span>
+          </div>
+
+          <div class="price">
+            {{ plan.totalAmount | currency:'INR':'symbol':'1.0-0' }}
+            <small *ngIf="plan.durationDays">/ {{ plan.durationDays }} days</small>
+          </div>
+          <p class="tax-note" *ngIf="plan.gstAmount">Includes GST {{ plan.gstAmount | currency:'INR':'symbol':'1.0-0' }}</p>
+
+          <ul>
+            <li *ngFor="let feature of plan.features">{{ feature }}</li>
+          </ul>
+
+          <button
+            type="button"
+            class="btn-primary"
+            [disabled]="isProcessing || isCurrentPlan(plan.plan)"
+            (click)="subscribe(plan.plan)">
+            {{ getPlanAction(plan.plan) }}
+          </button>
+        </article>
+      </div>
+    </section>
+
+    <section class="billing-history">
+      <div class="section-title">
+        <h2>Invoice History</h2>
+        <span>{{ invoices.length }} invoices</span>
+      </div>
+
+      <div class="table-wrap" *ngIf="invoices.length; else emptyInvoices">
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice</th>
+              <th>Plan</th>
+              <th>Date</th>
+              <th>Payment</th>
+              <th>Transaction</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let invoice of invoices">
+              <td>{{ invoice.invoiceNumber || ('#' + invoice.invoiceId) }}</td>
+              <td>{{ invoice.planName || '-' }}</td>
+              <td>{{ invoice.paymentDate | date:'mediumDate' }}</td>
+              <td>{{ invoice.paymentMode }}</td>
+              <td>{{ invoice.razorpayPaymentId || invoice.transactionId || '-' }}</td>
+              <td>{{ displayAmount(invoice) | currency:'INR':'symbol':'1.0-0' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptyInvoices>
+        <div class="empty-state">
+          <p>No invoices found</p>
+        </div>
+      </ng-template>
+    </section>
+  </ng-container>
+</div>

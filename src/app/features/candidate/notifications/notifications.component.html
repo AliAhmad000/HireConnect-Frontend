@@ -1,0 +1,65 @@
+<div class="notifications-container">
+  <div class="page-header">
+    <div>
+      <span class="hc-eyebrow">Signal inbox</span>
+      <h1>Notifications</h1>
+      <p *ngIf="unreadCount > 0">{{ unreadCount }} unread notification(s)</p>
+      <p *ngIf="unreadCount === 0">Your latest updates, interview changes, and hiring messages.</p>
+    </div>
+    <button class="btn-primary" *ngIf="unreadCount > 0" (click)="markAllAsRead()">
+      <span class="material-symbols-rounded">done_all</span>
+      Mark all as read
+    </button>
+  </div>
+
+  <div class="filter-tabs">
+    <button class="filter-tab" [class.active]="activeFilter === 'ALL'" (click)="applyFilter('ALL')">All</button>
+    <button class="filter-tab" [class.active]="activeFilter === 'UNREAD'" (click)="applyFilter('UNREAD')">
+      Unread
+      <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+    </button>
+    <button class="filter-tab" [class.active]="activeFilter === 'READ'" (click)="applyFilter('READ')">Read</button>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading notifications...</p>
+  </div>
+
+  <div class="notifications-list" *ngIf="!isLoading">
+    <article
+      class="notification-item hc-glass"
+      *ngFor="let notification of filteredNotifications"
+      [class.unread]="!notification.isRead"
+      [class]="getNotificationColor(notification.type)">
+      <div class="notification-icon">
+        <span class="material-symbols-rounded">{{ getNotificationIcon(notification.type) }}</span>
+      </div>
+
+      <div class="notification-content">
+        <div class="notification-header">
+          <h4>{{ notification.title }}</h4>
+          <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
+        </div>
+        <p class="notification-message">{{ notification.message }}</p>
+
+        <div class="notification-actions">
+          <button *ngIf="!notification.isRead" class="btn-outline-sm" (click)="markAsRead(notification.notificationId)">
+            Mark as read
+          </button>
+          <button class="btn-action danger" (click)="deleteNotification(notification.notificationId)">
+            Delete
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <div class="empty-state" *ngIf="filteredNotifications.length === 0">
+      <div class="empty-icon"><span class="material-symbols-rounded">notifications</span></div>
+      <h3>No notifications</h3>
+      <p *ngIf="activeFilter === 'ALL'">You're all caught up. New activity will appear here.</p>
+      <p *ngIf="activeFilter === 'UNREAD'">You have no unread notifications.</p>
+      <p *ngIf="activeFilter === 'READ'">No read notifications to display.</p>
+    </div>
+  </div>
+</div>

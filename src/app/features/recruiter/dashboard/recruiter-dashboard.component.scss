@@ -1,0 +1,138 @@
+:host {
+  display: block;
+}
+
+.hc-page {
+  display: grid;
+  gap: 20px;
+  padding-bottom: 36px;
+}
+
+.hc-page > .hc-page-header {
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.hc-page > .hc-card-grid--4 {
+  gap: 14px;
+}
+
+.hc-page > .hc-section,
+.hc-page > .hc-split > .hc-section {
+  padding: 22px;
+}
+
+.summary-card {
+  min-height: 0;
+  padding: 18px 20px;
+}
+
+.summary-card strong {
+  margin-bottom: 6px;
+}
+
+.section-header,
+.hc-section > .hc-page-header,
+.job-card .hc-page-header,
+.interview-card .hc-page-header {
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.hc-split {
+  align-items: start;
+  gap: 18px;
+}
+
+.category-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.category-card {
+  min-height: 88px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.category-card .material-symbols-rounded {
+  font-size: 1.3rem;
+}
+
+.category-card strong {
+  line-height: 1.2;
+}
+
+.hc-feed {
+  gap: 12px;
+}
+
+.hc-list-card,
+.job-card,
+.interview-card {
+  padding: 18px 20px;
+}
+
+.hc-list-card strong {
+  margin-bottom: 8px;
+}
+
+.hc-stat-row {
+  gap: 8px;
+}
+
+.hc-stat-row + .btn-primary-sm,
+.hc-stat-row + .btn-outline-sm {
+  margin-top: 16px;
+}
+
+.action-buttons {
+  gap: 10px;
+}
+
+.table-responsive {
+  padding: 0;
+}
+
+table th,
+table td {
+  padding-block: 14px;
+}
+
+@media (max-width: 1080px) {
+  .hc-page {
+    gap: 18px;
+  }
+
+  .hc-page > .hc-card-grid--4,
+  .hc-split {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 760px) {
+  .hc-page {
+    gap: 16px;
+  }
+
+  .hc-page > .hc-section,
+  .hc-page > .hc-split > .hc-section {
+    padding: 18px;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card,
+  .hc-list-card,
+  .job-card,
+  .interview-card,
+  .category-card {
+    padding: 16px 18px;
+  }
+}

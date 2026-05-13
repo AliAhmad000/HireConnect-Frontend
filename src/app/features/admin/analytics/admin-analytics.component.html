@@ -1,0 +1,97 @@
+<div class="admin-analytics">
+  <div class="page-header">
+    <div>
+      <span class="hc-eyebrow">Platform intelligence</span>
+      <h1>Platform analytics</h1>
+      <p>Marketplace health, growth, and revenue signals remapped into a cleaner operating view.</p>
+    </div>
+    <button type="button" (click)="exportReport()" class="btn-outline">Export report</button>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading analytics...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="hc-feed">
+    <section *ngIf="warningMessages.length > 0" class="warning-banner hc-glass">
+      <strong>Some analytics panels are running with fallback data.</strong>
+      <p>{{ warningMessages.join(' ') }}</p>
+    </section>
+
+    <section class="metrics-grid">
+      <article class="metric-card hc-glass">
+        <h3>Total users</h3>
+        <div class="value">{{ overviewMetrics.totalUsers | number }}</div>
+        <div class="trend" [ngClass]="overviewMetrics.userGrowthRate >= 0 ? 'positive' : 'negative'">{{ overviewMetrics.userGrowthRate }}% monthly growth</div>
+      </article>
+      <article class="metric-card hc-glass">
+        <h3>Active users</h3>
+        <div class="value">{{ overviewMetrics.activeUsers | number }}</div>
+        <div class="trend positive">{{ overviewMetrics.totalUsers ? ((overviewMetrics.activeUsers / overviewMetrics.totalUsers) * 100 | number:'1.0-1') : 0 }}% active</div>
+      </article>
+      <article class="metric-card hc-glass">
+        <h3>New users</h3>
+        <div class="value">{{ overviewMetrics.newUsersThisMonth | number }}</div>
+        <div class="trend neutral">This month</div>
+      </article>
+      <article class="metric-card hc-glass">
+        <h3>Total revenue</h3>
+        <div class="value">{{ overviewMetrics.totalRevenue | currency:'INR':'symbol':'1.0-0' }}</div>
+        <div class="trend" [ngClass]="overviewMetrics.revenueGrowth >= 0 ? 'positive' : 'negative'">{{ overviewMetrics.revenueGrowth }}% monthly growth</div>
+      </article>
+      <article class="metric-card hc-glass">
+        <h3>Avg time to hire</h3>
+        <div class="value">{{ overviewMetrics.avgTimeToHire }} days</div>
+        <div class="trend neutral">Based on completed interviews</div>
+      </article>
+      <article class="metric-card hc-glass">
+        <h3>Success rate</h3>
+        <div class="value">{{ overviewMetrics.successRate }}%</div>
+        <div class="trend positive">{{ totalOffers | number }} offers from {{ totalApplications | number }} applications</div>
+      </article>
+    </section>
+
+    <section class="chart-section hc-glass">
+      <h2>Monthly growth trends</h2>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Users</th>
+              <th>Jobs</th>
+              <th>Applications</th>
+              <th>Interviews</th>
+              <th>Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let stat of monthlyStats">
+              <td>{{ stat.month }}</td>
+              <td>{{ stat.users | number }}</td>
+              <td>{{ stat.jobs | number }}</td>
+              <td>{{ stat.applications | number }}</td>
+              <td>{{ stat.interviews | number }}</td>
+              <td>{{ stat.revenue | currency:'INR':'symbol':'1.0-0' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="chart-section hc-glass">
+      <h2>Top job categories</h2>
+      <div class="category-grid">
+        <article class="category-card hc-glass" *ngFor="let cat of topCategories">
+          <h3>{{ cat.name }}</h3>
+          <p>{{ cat.jobs | number }} jobs</p>
+          <p>{{ cat.applications | number }} applications</p>
+        </article>
+      </div>
+      <div class="empty-state" *ngIf="topCategories.length === 0">
+        <p>No category data available yet.</p>
+      </div>
+    </section>
+  </div>
+</div>

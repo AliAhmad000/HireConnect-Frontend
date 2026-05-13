@@ -1,0 +1,157 @@
+<div class="hc-page">
+  <div class="hc-page-header">
+    <div>
+      <span class="hc-eyebrow">Admin workspace</span>
+      <h1>Platform control center</h1>
+      <p>Monitor marketplace health, recent activity, and management actions from a lighter operational surface.</p>
+    </div>
+    <div class="action-buttons">
+      <span class="pill">Updated {{ lastUpdated | date:'mediumTime' }}</span>
+      <button (click)="exportDashboardReport()" class="btn-outline">Export report</button>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state hc-glass">
+    <div class="spinner"></div>
+    <p>Loading dashboard data...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="hc-feed">
+    <section *ngIf="warningMessages.length > 0" class="warning-banner hc-glass">
+      <strong>Some admin data is unavailable right now.</strong>
+      <p>{{ warningMessages.join(' ') }}</p>
+    </section>
+
+    <section class="category-grid">
+      <a *ngFor="let action of quickActions" [routerLink]="action.route" class="category-card hc-glass">
+        <span>{{ action.icon }}</span>
+        <strong>{{ action.label }}</strong>
+      </a>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card hc-glass">
+        <span>Total users</span>
+        <strong>{{ platformStats.totalUsers | number }}</strong>
+        <small class="hc-trend">Candidates {{ platformStats.totalCandidates | number }} - Recruiters {{ platformStats.totalRecruiters | number }}</small>
+      </article>
+      <article class="summary-card hc-glass">
+        <span>Total jobs</span>
+        <strong>{{ platformStats.totalJobs | number }}</strong>
+        <small class="hc-trend">Active {{ platformStats.activeJobs | number }}</small>
+      </article>
+      <article class="summary-card hc-glass">
+        <span>Applications</span>
+        <strong>{{ platformStats.totalApplications | number }}</strong>
+        <small class="hc-trend">Conversion {{ platformStats.conversionRate }}%</small>
+      </article>
+      <article class="summary-card hc-glass">
+        <span>Interviews</span>
+        <strong>{{ platformStats.totalInterviews | number }}</strong>
+        <small class="hc-trend">Offers {{ platformStats.totalOffers | number }}</small>
+      </article>
+      <article class="summary-card hc-glass">
+        <span>Revenue</span>
+        <strong>{{ platformStats.revenue | currency:'INR':'symbol':'1.0-0' }}</strong>
+        <small class="hc-trend">Monthly billing signal</small>
+      </article>
+      <article class="summary-card hc-glass">
+        <span>Success rate</span>
+        <strong>{{ platformStats.conversionRate }}%</strong>
+        <small class="hc-trend">Overall hire rate</small>
+      </article>
+    </section>
+
+    <div class="hc-two-col">
+      <section class="hc-section hc-glass">
+        <h2>User growth overview</h2>
+        <div class="mini-grid">
+          <div *ngFor="let point of userGrowthData" class="hc-list-card hc-glass">
+            <strong>{{ point.label }}</strong>
+            <p>{{ point.value | number }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="hc-section hc-glass">
+        <h2>Revenue pipeline</h2>
+        <div class="mini-grid">
+          <div *ngFor="let point of revenuePipelineData" class="hc-list-card hc-glass">
+            <strong>{{ point.label }}</strong>
+            <p>{{ point.value | currency:'INR':'symbol':'1.0-0' }}</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="hc-section hc-glass">
+      <div class="section-header">
+        <div>
+          <h2>Recent users</h2>
+          <p>Newest platform members with quick access to details.</p>
+        </div>
+        <a routerLink="/admin/users" class="btn-outline">All users</a>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Joined</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of recentUsers">
+              <td>{{ user.name }}</td>
+              <td><span class="role-badge" [class]="getRoleClass(user.role)">{{ getRoleLabel(user.role) }}</span></td>
+              <td>{{ user.joinedAt | date:'MMM d, yyyy' }}</td>
+              <td><span class="status-badge" [class]="getUserStatusClass(user.status)">{{ getStatusLabel(user.status) }}</span></td>
+              <td><a [routerLink]="['/admin/users', user.id]" class="btn-primary-sm">Open</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="empty-state" *ngIf="recentUsers.length === 0">
+          <p>No users found.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="hc-section hc-glass">
+      <div class="section-header">
+        <div>
+          <h2>Recent jobs</h2>
+          <p>Latest job activity across the platform.</p>
+        </div>
+        <a routerLink="/admin/jobs" class="btn-outline">All jobs</a>
+      </div>
+      <div class="table-responsive" *ngIf="recentJobs.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Type</th>
+              <th>Apps</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let job of recentJobs">
+              <td>{{ job.title }}<br><small>{{ job.companyName }}</small></td>
+              <td>{{ formatJobType(job.jobType) }}</td>
+              <td>{{ job.applicationsCount || 0 }}</td>
+              <td><span class="status-badge" [class]="job.status || 'UNKNOWN'">{{ getStatusLabel(job.status) }}</span></td>
+              <td><a [routerLink]="['/admin/jobs', job.jobId]" class="btn-primary-sm">Open</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="empty-state" *ngIf="recentJobs.length === 0">
+        <p>No jobs found.</p>
+      </div>
+    </section>
+  </div>
+</div>

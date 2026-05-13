@@ -1,0 +1,170 @@
+<div class="hc-page">
+  <section class="hc-home-hero">
+    <article class="hc-hero-card hc-glass hc-glass--strong">
+      <span class="hc-eyebrow">
+        <span class="material-symbols-rounded">travel_explore</span>
+        Role explorer
+      </span>
+      <h1>Search the live hiring grid.</h1>
+      <p class="hc-page-subtitle">
+        Discover active roles, filter by fit, and move quickly toward jobs worth applying for.
+      </p>
+
+      <form class="hc-search-inline" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+        <label class="hc-search-field">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" formControlName="title" placeholder="Role, skill, or company" (keyup.enter)="applyFilters()">
+        </label>
+        <label class="hc-search-field">
+          <span class="material-symbols-rounded">location_on</span>
+          <input type="text" formControlName="location" list="jobLocations" placeholder="City or remote" (keyup.enter)="applyFilters()">
+          <datalist id="jobLocations">
+            <option *ngFor="let location of locations" [value]="location"></option>
+          </datalist>
+        </label>
+        <button type="submit" class="btn-primary">
+          <span class="material-symbols-rounded">arrow_outward</span>
+          Search Roles
+        </button>
+      </form>
+
+      <div class="hc-stat-row">
+        <span><span class="material-symbols-rounded">work_history</span>{{ totalJobs | number }} active {{ totalJobs === 1 ? 'opportunity' : 'opportunities' }}</span>
+        <span><span class="material-symbols-rounded">sort</span>{{ sortControl.value || 'recent' }}</span>
+      </div>
+    </article>
+
+    <aside class="hc-section hc-glass">
+      <div class="section-header">
+        <div>
+          <h2>Filter lens</h2>
+          <p>Adjust demand, salary, and seniority without leaving the results surface.</p>
+        </div>
+        <button type="button" class="btn-outline-sm" (click)="resetFilters()">Clear</button>
+      </div>
+
+      <form [formGroup]="filterForm" class="hc-form-grid">
+        <label class="hc-field full-width">
+          Category
+          <select formControlName="category">
+            <option value="">All Categories</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </label>
+
+        <label class="hc-field full-width">
+          Job type
+          <select formControlName="type">
+            <option value="">All Types</option>
+            <option *ngFor="let type of jobTypes" [value]="type">{{ formatJobType(type) }}</option>
+          </select>
+        </label>
+
+        <label class="hc-field">
+          Salary min
+          <input type="number" formControlName="salaryMin" placeholder="Min">
+        </label>
+
+        <label class="hc-field">
+          Salary max
+          <input type="number" formControlName="salaryMax" placeholder="Max">
+        </label>
+
+        <label class="hc-field full-width">
+          Experience level
+          <select formControlName="experienceLevel">
+            <option value="">Any Level</option>
+            <option *ngFor="let level of experienceLevels" [value]="level">{{ level }}</option>
+          </select>
+        </label>
+
+        <button type="button" class="btn-primary full-width" (click)="applyFilters()">Apply Filters</button>
+      </form>
+    </aside>
+  </section>
+
+  <section class="hc-section hc-glass">
+    <div class="hc-page-header">
+      <div>
+        <span class="hc-eyebrow">Results</span>
+        <h2>{{ isLoading ? 'Searching...' : (totalJobs + ' roles found') }}</h2>
+      </div>
+      <label class="hc-field" style="min-width: 220px;">
+        Sort by
+        <select [formControl]="sortControl" (change)="changeSort()">
+          <option value="recent">Most Recent</option>
+          <option value="title">Title A to Z</option>
+          <option value="salaryHigh">Salary: High to Low</option>
+          <option value="salaryLow">Salary: Low to High</option>
+          <option value="experience">Experience: Low to High</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="hc-feed" *ngIf="!isLoading">
+      <article class="job-card hc-glass" [class.applied-job]="hasApplied(job.jobId)" *ngFor="let job of jobs; trackBy: trackByJobId">
+        <div class="hc-page-header">
+          <div class="job-card__head">
+            <div class="company-logo">
+              <img *ngIf="job.companyLogo; else companyInitialTpl" [src]="job.companyLogo" [alt]="job.companyName">
+              <ng-template #companyInitialTpl>
+                <span class="company-initial">{{ companyInitial(job) }}</span>
+              </ng-template>
+            </div>
+            <div>
+              <h3><a [routerLink]="['/jobs', job.jobId]">{{ job.title }}</a></h3>
+              <p>{{ job.companyName }}</p>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <span class="status-badge" *ngIf="hasApplied(job.jobId)">Applied</span>
+            <button class="btn-outline-sm" [class.text-red-500]="isJobSaved(job.jobId)" (click)="saveJob(job.jobId)">
+              {{ isJobSaved(job.jobId) ? 'Saved' : 'Save' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="hc-stat-row">
+          <span><span class="material-symbols-rounded">location_on</span>{{ job.location }}</span>
+          <span><span class="material-symbols-rounded">business_center</span>{{ formatJobType(job.jobType) }}</span>
+          <span><span class="material-symbols-rounded">payments</span>{{ salaryLabel(job) }}</span>
+        </div>
+
+        <p class="line-clamp-2">{{ job.description }}</p>
+
+        <div class="skill-list">
+          <span class="pill" *ngFor="let skill of job.skills.slice(0, 5)">{{ skill }}</span>
+          <span class="pill" *ngIf="job.skills.length > 5">+{{ job.skills.length - 5 }} more</span>
+        </div>
+
+        <div class="job-actions">
+          <span class="muted">Posted {{ job.postedAt | date:'MMM d, yyyy' }}</span>
+          <a [routerLink]="['/jobs', job.jobId]" class="btn-primary-sm">
+            {{ hasApplied(job.jobId) ? 'View Applied Job' : 'Open Role' }}
+          </a>
+        </div>
+      </article>
+
+      <div class="empty-state" *ngIf="jobs.length === 0">
+        <h3>No jobs found</h3>
+        <p>We couldn't find roles that match the current filter combination.</p>
+        <button class="btn-outline" (click)="resetFilters()">Clear filters</button>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Searching for opportunities...</p>
+    </div>
+
+    <div class="hc-page-header" *ngIf="!isLoading && totalJobs > pageSize">
+      <p>Showing {{ showingFrom }} to {{ showingTo }} of {{ totalJobs }} results</p>
+      <div class="action-buttons">
+        <button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)" class="btn-outline-sm">Previous</button>
+        <span class="pill">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)" class="btn-outline-sm">Next</button>
+      </div>
+    </div>
+  </section>
+</div>

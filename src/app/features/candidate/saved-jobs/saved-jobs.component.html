@@ -1,0 +1,51 @@
+<div class="saved-jobs-container">
+  <div class="page-header">
+    <div>
+      <span class="hc-eyebrow">Bookmark stack</span>
+      <h1>Saved jobs</h1>
+      <p>Roles you want to revisit now live in a cleaner shortlist board.</p>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading && savedJobs.length === 0">
+    <div class="spinner"></div>
+    <p>Loading saved jobs...</p>
+  </div>
+
+  <div class="empty-state error-state" *ngIf="!isLoading && errorMessage">
+    <p>{{ errorMessage }}</p>
+    <button type="button" class="btn-primary" (click)="loadSavedJobs()">Try Again</button>
+  </div>
+
+  <div class="jobs-grid" *ngIf="!isLoading || savedJobs.length > 0">
+    <article class="job-card hc-glass" *ngFor="let job of savedJobs">
+      <div class="job-card__head">
+        <div class="company-logo" *ngIf="!job.companyLogo">{{ companyInitial(job) }}</div>
+        <img *ngIf="job.companyLogo" [src]="job.companyLogo" [alt]="job.companyName" class="company-logo">
+        <div>
+          <h3>{{ job.title }}</h3>
+          <p>{{ job.companyName }}</p>
+        </div>
+        <button class="btn-action warning" (click)="removeSavedJob(job.jobId)" title="Remove from saved">
+          <span class="material-symbols-rounded">star</span>
+        </button>
+      </div>
+
+      <div class="hc-stat-row">
+        <span><span class="material-symbols-rounded">location_on</span>{{ job.location }}</span>
+        <span><span class="material-symbols-rounded">business_center</span>{{ job.jobType }}</span>
+        <span><span class="material-symbols-rounded">payments</span>{{ salaryLabel(job) }}</span>
+      </div>
+
+      <div class="job-actions">
+        <span class="muted">Posted {{ job.postedAt | date:'mediumDate' }}</span>
+        <a [routerLink]="['/candidate/jobs', job.jobId]" class="btn-primary-sm">Open role</a>
+      </div>
+    </article>
+
+    <div class="empty-state" *ngIf="!isLoading && savedJobs.length === 0 && !errorMessage">
+      <p>You haven't saved any active jobs yet.</p>
+      <a routerLink="/candidate/jobs" class="btn-primary">Browse Jobs</a>
+    </div>
+  </div>
+</div>

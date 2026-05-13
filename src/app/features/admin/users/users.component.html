@@ -1,0 +1,97 @@
+<div class="users-container">
+  <div class="page-header">
+    <div>
+      <span class="hc-eyebrow">User operations</span>
+      <h1>User management</h1>
+      <p>Search, filter, and act on platform accounts from a cleaner admin table.</p>
+    </div>
+    <button (click)="exportUsers()" class="btn-outline">Export report</button>
+  </div>
+
+  <section class="summary-grid">
+    <article class="summary-card hc-glass">
+      <span>Total users</span>
+      <strong>{{ users.length | number }}</strong>
+    </article>
+    <article class="summary-card hc-glass">
+      <span>Candidates</span>
+      <strong>{{ getRoleCount('CANDIDATE') | number }}</strong>
+    </article>
+    <article class="summary-card hc-glass">
+      <span>Recruiters</span>
+      <strong>{{ getRoleCount('RECRUITER') | number }}</strong>
+    </article>
+    <article class="summary-card hc-glass">
+      <span>Active</span>
+      <strong>{{ getStatusCount('ACTIVE') | number }}</strong>
+    </article>
+  </section>
+
+  <section class="hc-section hc-glass">
+    <div class="hc-form-grid hc-form-grid--3">
+      <label class="hc-field">
+        Search
+        <input type="text" [formControl]="searchControl" placeholder="Search users by name or email...">
+      </label>
+      <label class="hc-field">
+        Role
+        <select [formControl]="roleFilter">
+          <option *ngFor="let role of roles" [value]="role">{{ role === 'ALL' ? 'All Roles' : role }}</option>
+        </select>
+      </label>
+      <label class="hc-field">
+        Status
+        <select [formControl]="statusFilter">
+          <option *ngFor="let status of statuses" [value]="status">{{ status === 'ALL' ? 'All Status' : status }}</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading users...</p>
+  </div>
+
+  <div class="table-responsive hc-glass" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Activity</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td><span class="role-badge" [class]="user.role.toLowerCase()">{{ user.role }}</span></td>
+          <td>{{ user.joinedAt | date:'mediumDate' }}</td>
+          <td>
+            <span *ngIf="user.role === 'CANDIDATE'">{{ user.applications }} applications</span>
+            <span *ngIf="user.role === 'RECRUITER'">{{ user.jobsPosted }} jobs posted</span>
+            <span *ngIf="user.role === 'ADMIN'">{{ user.permissions }} access</span>
+          </td>
+          <td><span class="status-badge" [ngClass]="{ 'ACTIVE': user.status === 'ACTIVE', 'REJECTED': user.status === 'SUSPENDED' }">{{ user.status }}</span></td>
+          <td>
+            <div class="action-buttons">
+              <a [routerLink]="['/admin/users', user.id]" class="btn-outline-sm">Open</a>
+              <button *ngIf="user.status === 'ACTIVE'" class="btn-action warning" (click)="suspendUser(user.id)">Suspend</button>
+              <button *ngIf="user.status === 'SUSPENDED'" class="btn-action success" (click)="activateUser(user.id)">Activate</button>
+              <button class="btn-action danger" (click)="deleteUser(user.id)">Delete</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredUsers.length === 0">
+      <p>No users found matching your criteria.</p>
+    </div>
+  </div>
+</div>

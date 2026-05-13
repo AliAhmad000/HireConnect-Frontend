@@ -1,0 +1,111 @@
+<!-- src/app/features/recruiter/analytics/analytics.component.html -->
+<div class="analytics-container">
+  <div class="page-header">
+    <h1>Analytics Dashboard</h1>
+    <p>Track your hiring performance and metrics</p>
+    <button class="btn-export" (click)="exportReport()"><span class="material-symbols-rounded">download</span> Export Report</button>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading analytics data...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && errorMessage">
+    <h3>Analytics unavailable</h3>
+    <p>{{ errorMessage }}</p>
+    <button class="btn-export" (click)="loadData()">Retry</button>
+  </div>
+
+  <div *ngIf="!isLoading && summary">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card">
+        <h3>Total Applications</h3>
+        <div class="value">{{ summary.totalApplications }}</div>
+      </div>
+      <div class="summary-card">
+        <h3>Shortlisted</h3>
+        <div class="value">{{ summary.shortlistedCount }}</div>
+      </div>
+      <div class="summary-card">
+        <h3>Offers Made</h3>
+        <div class="value">{{ summary.offeredCount }}</div>
+      </div>
+      <div class="summary-card">
+        <h3>Avg Time to Hire</h3>
+        <div class="value">{{ summary.avgTimeToHireDays }} days</div>
+      </div>
+      <div class="summary-card">
+        <h3>View-to-Apply Ratio</h3>
+        <div class="value">{{ summary.viewToApplyRatio }}%</div>
+      </div>
+    </div>
+
+    <!-- Job Selector -->
+    <div class="job-selector">
+      <h2>Job Performance</h2>
+      <select [(ngModel)]="selectedJobId" (change)="selectJob(selectedJobId!)" [disabled]="jobAnalytics.length === 0">
+        <option value="">Select a job to view analytics</option>
+        <option *ngFor="let job of jobAnalytics" [value]="job.jobId">{{ job.title }}</option>
+      </select>
+      <p *ngIf="jobAnalytics.length === 0">No jobs posted yet.</p>
+    </div>
+
+    <!-- Job Analytics -->
+    <div class="job-analytics" *ngIf="selectedJobAnalytics">
+      <h3>{{ selectedJobAnalytics.title }}</h3>
+      
+      <div class="metrics-grid">
+        <div class="metric">
+          <span class="label">Views</span>
+          <span class="number">{{ selectedJobAnalytics.views }}</span>
+        </div>
+        <div class="metric">
+          <span class="label">Applications</span>
+          <span class="number">{{ selectedJobAnalytics.applications }}</span>
+        </div>
+        <div class="metric">
+          <span class="label">Conversion Rate</span>
+          <span class="number">{{ selectedJobAnalytics.conversionRate }}%</span>
+        </div>
+        <div class="metric">
+          <span class="label">Shortlisted</span>
+          <span class="number">{{ selectedJobAnalytics.shortlisted }}</span>
+        </div>
+        <div class="metric">
+          <span class="label">Interviews</span>
+          <span class="number">{{ selectedJobAnalytics.interviews }}</span>
+        </div>
+        <div class="metric">
+          <span class="label">Offered</span>
+          <span class="number">{{ selectedJobAnalytics.offered }}</span>
+        </div>
+      </div>
+
+      <!-- Pipeline Visualization -->
+      <div class="pipeline-stages">
+        <div class="stage">
+          <div class="stage-bar" [style.width.%]="getPipelineWidth(selectedJobAnalytics.applications)">
+            Applied: {{ selectedJobAnalytics.applications }}
+          </div>
+        </div>
+        <div class="stage">
+          <div class="stage-bar" [style.width.%]="getPipelineWidth(selectedJobAnalytics.shortlisted)">
+            Shortlisted: {{ selectedJobAnalytics.shortlisted }}
+          </div>
+        </div>
+        <div class="stage">
+          <div class="stage-bar" [style.width.%]="getPipelineWidth(selectedJobAnalytics.interviews)">
+            Interviewed: {{ selectedJobAnalytics.interviews }}
+          </div>
+        </div>
+        <div class="stage">
+          <div class="stage-bar" [style.width.%]="getPipelineWidth(selectedJobAnalytics.offered)">
+            Offered: {{ selectedJobAnalytics.offered }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

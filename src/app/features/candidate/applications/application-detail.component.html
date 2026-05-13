@@ -1,0 +1,117 @@
+<div class="application-detail-container">
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading application details...</p>
+  </div>
+
+  <div *ngIf="!isLoading && application">
+    <div class="page-header">
+      <div>
+        <a routerLink="/candidate/applications" class="legal-link">Back to my applications</a>
+        <h1>Application detail</h1>
+        <p>Follow the exact state of this application inside the redesigned timeline view.</p>
+      </div>
+      <span class="status-badge-sm" [class]="getStatusClass(application.status)">
+        {{ application.status.replace('_', ' ') }}
+      </span>
+    </div>
+
+    <div class="status-banner hc-glass" [class]="getStatusClass(application.status)">
+      <div class="status-content">
+        <span class="material-symbols-rounded status-icon">{{ getStatusIcon(application.status) }}</span>
+        <div>
+          <h2>{{ application.status.replace('_', ' ') }}</h2>
+          <p>{{ getStatusMessage(application.status) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <section class="timeline-section hc-glass">
+      <h3>Application timeline</h3>
+      <div class="timeline">
+        <div
+          class="timeline-step"
+          *ngFor="let step of timelineSteps"
+          [class.completed]="isStepCompleted(step.status)"
+          [class.active]="isStepActive(step.status)"
+          [class.rejected]="application.status === 'REJECTED' && step.status === 'OFFERED'">
+          <div class="step-icon">
+            <span class="material-symbols-rounded">{{ step.icon }}</span>
+          </div>
+          <span class="step-label">{{ step.label }}</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="detail-grid">
+      <section class="detail-card hc-glass">
+        <h3>Job details</h3>
+        <h4>{{ application.job?.title }}</h4>
+        <p>{{ application.job?.companyName }}</p>
+        <div class="hc-stat-row">
+          <span><span class="material-symbols-rounded">location_on</span>{{ application.job?.location }}</span>
+          <span><span class="material-symbols-rounded">business_center</span>{{ application.job?.jobType?.replace('_', ' ') }}</span>
+          <span><span class="material-symbols-rounded">payments</span>{{ application.job?.salaryMin | currency }} - {{ application.job?.salaryMax | currency }}</span>
+        </div>
+        <a [routerLink]="['/jobs', application.jobId]" class="btn-primary">Open job page</a>
+      </section>
+
+      <section class="detail-card hc-glass">
+        <h3>Application information</h3>
+        <div class="hc-feed">
+          <div class="hc-list-card hc-glass">
+            <strong>Applied on</strong>
+            <p>{{ application.appliedAt | date:'fullDate' }}</p>
+            <small>{{ application.appliedAt | date:'h:mm a' }}</small>
+          </div>
+          <div class="hc-list-card hc-glass">
+            <strong>Status</strong>
+            <span class="status-badge-sm" [class]="getStatusClass(application.status)">
+              {{ application.status.replace('_', ' ') }}
+            </span>
+          </div>
+          <div class="hc-list-card hc-glass">
+            <strong>Resume</strong>
+            <a *ngIf="application.resumeUrl" [href]="getResumeUrl()" target="_blank" class="btn-outline-sm">View Resume</a>
+            <span *ngIf="!application.resumeUrl">No resume attached</span>
+          </div>
+        </div>
+        <div class="cover-letter" *ngIf="application.coverLetter">
+          <h4>Your cover letter</h4>
+          <p>{{ application.coverLetter }}</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="action-panel hc-glass" *ngIf="application.status === 'APPLIED'">
+      <div>
+        <h2>Need to step back?</h2>
+        <p>You can still withdraw this application while it is in the applied state.</p>
+      </div>
+      <div class="action-buttons">
+        <button class="btn-action danger" (click)="withdrawApplication()" [disabled]="isWithdrawing">
+          {{ isWithdrawing ? 'Withdrawing...' : 'Withdraw application' }}
+        </button>
+      </div>
+    </div>
+
+    <section class="hc-section hc-glass" *ngIf="application.status === 'INTERVIEW_SCHEDULED'">
+      <h3>Interview prep checklist</h3>
+      <div class="hc-feed">
+        <div class="hc-list-card hc-glass">
+          <strong>1. Review the role</strong>
+          <p>Revisit the job description, required skills, and company context.</p>
+        </div>
+        <div class="hc-list-card hc-glass">
+          <strong>2. Check the interview details</strong>
+          <p>Confirm time, meeting link, or location before the session.</p>
+          <a routerLink="/candidate/interviews" class="btn-outline-sm">Open interviews</a>
+        </div>
+        <div class="hc-list-card hc-glass">
+          <strong>3. Follow up after the meeting</strong>
+          <p>Send a concise thank-you note within 24 hours.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

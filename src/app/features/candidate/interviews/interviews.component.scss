@@ -1,0 +1,335 @@
+// src/app/features/candidate/interviews/interviews.component.scss
+.interviews-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: #666;
+  }
+}
+
+.interviews-section {
+  margin-bottom: 3rem;
+
+  h2 {
+    font-size: 1.25rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.interviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.interview-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  &.past {
+    opacity: 0.7;
+  }
+
+  .interview-header {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .interview-date {
+    text-align: center;
+    min-width: 70px;
+
+    .day {
+      display: block;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+      line-height: 1;
+    }
+
+    .month {
+      display: block;
+      font-size: 1rem;
+      color: #666;
+      text-transform: uppercase;
+    }
+
+    .year {
+      display: block;
+      font-size: 0.85rem;
+      color: #999;
+    }
+  }
+
+  .interview-info {
+    flex: 1;
+
+    h3 {
+      color: #333;
+      margin-bottom: 0.25rem;
+    }
+
+    .company {
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+
+    .interview-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+
+      span {
+        color: #666;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .interview-status {
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+
+      &.scheduled { background: #fff3e0; color: #ef6c00; }
+      &.confirmed { background: #e8f5e9; color: #2e7d32; }
+      &.completed { background: #e3f2fd; color: #1976d2; }
+      &.cancelled { background: #ffebee; color: #c62828; }
+      &.rescheduled { background: #f3e5f5; color: #7b1fa2; }
+      &.reschedule_requested { background: #fff8e1; color: #f57c00; }
+    }
+  }
+
+  .interview-notes {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    color: #666;
+
+    &.reschedule-note {
+      background: #fff8e1;
+      color: #8a5a00;
+    }
+  }
+
+  .reschedule-form {
+    display: grid;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #ffe0a3;
+    border-radius: 8px;
+    background: #fffaf0;
+
+    label {
+      display: grid;
+      gap: 0.35rem;
+      color: #333;
+      font-weight: 500;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 0.7rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font: inherit;
+      resize: vertical;
+    }
+
+    .form-error {
+      margin: 0;
+      color: #c62828;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+  }
+
+  .interview-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+
+    button, a {
+      padding: 0.5rem 1.25rem;
+      border-radius: 25px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #667eea;
+      border: 2px solid #667eea;
+
+      &:hover {
+        background: #667eea;
+        color: white;
+      }
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: #ff4757;
+      border: 2px solid #ff4757;
+
+      &:hover {
+        background: #ff4757;
+        color: white;
+      }
+    }
+  }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 4rem;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Professional candidate refresh
+.interviews-container {
+  max-width: 960px;
+  padding: 24px;
+  color: #172033;
+}
+
+.page-header {
+  h1 {
+    color: #111827;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+
+  p {
+    color: #667085;
+  }
+}
+
+.interview-card {
+  border: 1px solid #e5e9f2;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+
+  .interview-date {
+    min-width: 72px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #eff6ff;
+
+    .day {
+      color: #1d4ed8;
+    }
+  }
+
+  .interview-info {
+    h3 {
+      color: #111827;
+    }
+
+    .company {
+      color: #475467;
+    }
+
+    .interview-details span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 30px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #475467;
+    }
+  }
+
+  .reschedule-form input,
+  .reschedule-form textarea {
+    border: 1px solid #d0d5dd;
+  }
+
+  .interview-actions {
+    button,
+    a {
+      border-radius: 8px;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+    }
+
+    .btn-outline {
+      border: 1px solid #d0d5dd;
+      color: #344054;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .interviews-container {
+    padding: 16px;
+  }
+
+  .interview-card .interview-header {
+    flex-direction: column;
+  }
+
+  .interview-card .interview-actions button,
+  .interview-card .interview-actions a {
+    width: 100%;
+    text-align: center;
+  }
+}

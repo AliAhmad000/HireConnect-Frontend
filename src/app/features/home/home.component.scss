@@ -1,0 +1,245 @@
+:host {
+  display: block;
+  padding-bottom: 48px;
+}
+
+.home-page {
+  display: grid;
+  gap: 24px;
+}
+
+.hc-hero-card {
+  display: grid;
+  gap: 22px;
+}
+
+.hero-brand-copy {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  max-width: 780px;
+  padding: 4px 0 10px;
+}
+
+.hero-brand-copy__eyebrow {
+  width: fit-content;
+  margin-bottom: 0;
+  padding: 0.58rem 0.88rem;
+  border: 1px solid rgba(58, 159, 232, 0.18);
+  border-radius: 999px;
+  background: rgba(58, 159, 232, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.hero-brand-copy h1 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.16em;
+  align-items: baseline;
+  font-size: clamp(4rem, 9vw, 8.4rem);
+  font-weight: 800;
+  line-height: 0.82;
+  letter-spacing: 0;
+}
+
+.hero-brand-copy h1 span:first-child {
+  color: var(--hc-text);
+}
+
+.hero-brand-copy h1 span:last-child {
+  color: var(--hc-primary-strong);
+  text-shadow: 0 16px 34px rgba(23, 127, 208, 0.2);
+}
+
+.hero-brand-copy .hc-page-subtitle {
+  max-width: 660px;
+  margin-top: 6px;
+  color: #416f8f;
+  font-size: clamp(1.08rem, 1.4vw, 1.28rem);
+  line-height: 1.55;
+}
+
+.hero-popular {
+  display: grid;
+  gap: 12px;
+}
+
+.hero-popular > span {
+  color: #537893;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.hero-popular__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hero-popular__list button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(126, 188, 224, 0.22);
+  background: rgba(255, 255, 255, 0.62);
+  color: #123049;
+  font-weight: 700;
+}
+
+.hero-popular__list small {
+  color: #537893;
+}
+
+.hero-side__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.hero-kpi {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(126, 188, 224, 0.2);
+}
+
+.hero-kpi strong {
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  font-size: 1.75rem;
+}
+
+.hero-kpi small {
+  color: #537893;
+}
+
+.hero-spotlight {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.66));
+}
+
+.hero-spotlight__company {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(58, 159, 232, 0.12);
+  color: #177fd0;
+  font-weight: 800;
+  font-size: 0.82rem;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.category-card {
+  display: grid;
+  gap: 10px;
+  text-align: left;
+  border: 0;
+}
+
+.category-card strong {
+  font-size: 1rem;
+}
+
+.category-card small {
+  color: #537893;
+}
+
+.jobs-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.job-card {
+  display: grid;
+  gap: 18px;
+}
+
+.job-card__head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.job-card__head p {
+  margin: 6px 0 0;
+  color: #537893;
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.workflow-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.workflow-grid article {
+  padding: 20px;
+  border-radius: 24px;
+}
+
+.workflow-grid article h3 {
+  margin: 14px 0 12px;
+  font-size: 1.15rem;
+}
+
+.workflow-grid article p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 0;
+}
+
+@media (max-width: 1080px) {
+  .category-grid,
+  .jobs-grid,
+  .workflow-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .hero-kpis,
+  .category-grid,
+  .jobs-grid,
+  .workflow-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-side__head {
+    flex-direction: column;
+  }
+
+  .hero-brand-copy h1 {
+    font-size: clamp(3.2rem, 16vw, 5.2rem);
+    line-height: 0.88;
+  }
+
+  .hero-brand-copy .hc-page-subtitle {
+    font-size: 1rem;
+  }
+}

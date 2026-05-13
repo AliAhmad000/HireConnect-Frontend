@@ -1,0 +1,188 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div>
+      <p class="eyebrow">Recruiter Workspace</p>
+      <h1>Profile</h1>
+      <p>Keep your hiring identity, company details, and candidate-facing links accurate.</p>
+    </div>
+    <button type="button" class="btn-primary" *ngIf="!isLoading && !errorMessage && !isEditing" (click)="startEditing()">
+      Edit Profile
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading profile...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && errorMessage">
+    <h3>Profile unavailable</h3>
+    <p>{{ errorMessage }}</p>
+    <button type="button" class="btn-primary" (click)="loadProfile()">Retry</button>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !errorMessage && !isEditing">
+    <section class="profile-hero">
+      <div class="brand-mark" *ngIf="!getProfileLogoUrl()">
+        {{ getProfileInitials() }}
+      </div>
+      <img class="company-logo" *ngIf="getProfileLogoUrl()" [src]="getProfileLogoUrl()" alt="Company logo">
+
+      <div class="hero-copy">
+        <h2>{{ getDisplayValue(profile?.companyName, 'Company profile') }}</h2>
+        <p>{{ getDisplayValue(profile?.industry, 'Industry not added') }}</p>
+        <div class="hero-tags">
+          <span>{{ getDisplayValue(profile?.companySize, 'Company size not added') }}</span>
+          <span>{{ getDisplayValue(profile?.designation, 'Designation not added') }}</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="profile-layout">
+      <section class="profile-section">
+        <div class="section-title">
+          <h2>Recruiter Details</h2>
+          <p>Your contact identity for candidate communication.</p>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span>Full Name</span>
+            <strong>{{ getDisplayValue(profile?.fullName) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span>Email</span>
+            <strong>{{ getDisplayValue(profile?.email) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span>Mobile</span>
+            <strong>{{ getDisplayValue(profile?.mobile) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span>Designation</span>
+            <strong>{{ getDisplayValue(profile?.designation) }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="profile-section">
+        <div class="section-title">
+          <h2>Company Profile</h2>
+          <p>Information candidates see when reviewing your openings.</p>
+        </div>
+        <p class="company-description">{{ getDisplayValue(profile?.companyDescription, 'Add a short company description to make your job posts feel more trustworthy.') }}</p>
+        <div class="link-row">
+          <a *ngIf="profile?.website" [href]="getWebsiteUrl(profile?.website)" target="_blank" rel="noopener">Website</a>
+          <a *ngIf="profile?.linkedinUrl" [href]="getWebsiteUrl(profile?.linkedinUrl)" target="_blank" rel="noopener">LinkedIn</a>
+          <span *ngIf="!profile?.website && !profile?.linkedinUrl">No public links added</span>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading && !errorMessage && isEditing">
+    <section class="profile-section">
+      <div class="section-title">
+        <h2>Personal Details</h2>
+        <p>These details identify the recruiter managing hiring activity.</p>
+      </div>
+      <div class="form-grid">
+        <label>
+          Full name
+          <input type="text" formControlName="fullName" placeholder="Your full name">
+        </label>
+        <label>
+          Email
+          <input type="email" formControlName="email" placeholder="name@company.com">
+        </label>
+        <label>
+          Mobile
+          <input type="tel" formControlName="mobile" placeholder="+91 98765 43210">
+        </label>
+        <label>
+          Designation
+          <input type="text" formControlName="designation" placeholder="Talent Acquisition Manager">
+        </label>
+      </div>
+    </section>
+
+    <section class="profile-section">
+      <div class="section-title">
+        <h2>Company Details</h2>
+        <p>Use accurate company information so candidates know who is contacting them.</p>
+      </div>
+      <div class="form-grid">
+        <label>
+          Company name
+          <input type="text" formControlName="companyName" placeholder="Company Pvt Ltd">
+        </label>
+        <label>
+          Company size
+          <select formControlName="companySize">
+            <option value="">Select size</option>
+            <option value="1-10">1-10</option>
+            <option value="11-50">11-50</option>
+            <option value="51-200">51-200</option>
+            <option value="201-500">201-500</option>
+            <option value="501-1000">501-1000</option>
+            <option value="1000+">1000+</option>
+          </select>
+        </label>
+        <label>
+          Industry
+          <input type="text" formControlName="industry" placeholder="Information Technology">
+        </label>
+        <label>
+          Website
+          <input type="url" formControlName="website" placeholder="https://company.com">
+        </label>
+        <label>
+          LinkedIn URL
+          <input type="url" formControlName="linkedinUrl" placeholder="https://linkedin.com/company/...">
+        </label>
+        <label>
+          Logo URL
+          <input type="url" formControlName="logoUrl" placeholder="https://company.com/logo.png">
+        </label>
+      </div>
+
+      <div class="logo-preview-card">
+        <div class="brand-mark small" *ngIf="!hasFormLogoUrl() || logoPreviewFailed">
+          {{ getProfileInitials() }}
+        </div>
+        <img
+          class="company-logo small"
+          *ngIf="hasFormLogoUrl() && !logoPreviewFailed"
+          [src]="getFormLogoUrl()"
+          alt="Company logo preview"
+          (error)="onLogoPreviewError()"
+        >
+        <div class="logo-preview-copy">
+          <strong>{{ hasFormLogoUrl() ? 'Logo preview' : 'No logo link added' }}</strong>
+          <p *ngIf="hasFormLogoUrl() && !logoPreviewFailed">This logo will appear on your recruiter profile and job cards.</p>
+          <p *ngIf="hasFormLogoUrl() && logoPreviewFailed">This logo link could not be loaded. Check that the URL points directly to an image.</p>
+          <p *ngIf="!hasFormLogoUrl()">Add a direct image URL to show your company logo.</p>
+        </div>
+        <button
+          type="button"
+          class="btn-remove-logo"
+          *ngIf="hasFormLogoUrl()"
+          (click)="removeLogoUrl()"
+          [disabled]="isSaving">
+          Remove Logo
+        </button>
+      </div>
+
+      <label class="full-width">
+        Company description
+        <textarea rows="5" formControlName="companyDescription" placeholder="Tell candidates about your company"></textarea>
+      </label>
+    </section>
+
+    <div class="form-actions">
+      <button type="button" class="btn-outline" (click)="cancelEditing()" [disabled]="isSaving">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : 'Save Profile' }}
+      </button>
+    </div>
+  </form>
+</div>

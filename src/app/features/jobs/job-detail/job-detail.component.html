@@ -1,0 +1,77 @@
+<div class="job-detail-container">
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading job details...</p>
+  </div>
+
+  <div *ngIf="!isLoading && job" class="hc-page">
+    <div class="page-header">
+      <div>
+        <a routerLink="/jobs" class="legal-link">Back to jobs</a>
+        <h1>{{ job.title }}</h1>
+        <p>{{ job.companyName }}</p>
+      </div>
+      <div class="action-buttons">
+        <button *ngIf="!hasApplied" (click)="applyForJob()" [disabled]="isApplying" class="btn-primary">
+          <span *ngIf="!isApplying">Apply now</span>
+          <span *ngIf="isApplying">Applying...</span>
+        </button>
+        <div *ngIf="hasApplied" class="status-badge ACTIVE">Applied successfully</div>
+      </div>
+    </div>
+
+    <section class="job-header-card hc-glass hc-glass--strong">
+      <div class="hc-page-header">
+        <div class="job-card__head">
+          <div class="company-logo">
+            <img [src]="job.companyLogo || 'assets/default-company.png'" [alt]="job.companyName">
+          </div>
+          <div>
+            <h2>{{ job.title }}</h2>
+            <p>{{ job.companyName }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="hc-stat-row">
+        <span><span class="material-symbols-rounded">location_on</span>{{ job.location }}</span>
+        <span><span class="material-symbols-rounded">business_center</span>{{ job.jobType }}</span>
+        <span><span class="material-symbols-rounded">payments</span>{{ job.salaryMin | currency }} - {{ job.salaryMax | currency }}</span>
+        <span><span class="material-symbols-rounded">calendar_today</span>{{ job.postedAt | date:'mediumDate' }}</span>
+      </div>
+    </section>
+
+    <div class="hc-split">
+      <section class="content-section hc-glass">
+        <h2>Role overview</h2>
+        <p class="line-clamp-3">{{ job.description }}</p>
+      </section>
+
+      <aside class="detail-card hc-glass">
+        <h3>Required skills</h3>
+        <div class="skill-list">
+          <span class="pill" *ngFor="let skill of job.skills">{{ skill }}</span>
+        </div>
+
+        <h3>Additional information</h3>
+        <div class="hc-feed">
+          <div class="hc-list-card hc-glass">
+            <strong>Experience</strong>
+            <p>{{ job.experienceRequired }} years minimum</p>
+          </div>
+          <div class="hc-list-card hc-glass">
+            <strong>Vacancies</strong>
+            <p>{{ job.vacancies }} open positions</p>
+          </div>
+        </div>
+
+        <div class="action-buttons" style="margin-top: 16px;">
+          <button *ngIf="!hasApplied" (click)="applyForJob()" [disabled]="isApplying" class="btn-primary" style="width: 100%;">
+            {{ isApplying ? 'Applying...' : 'Apply for this role' }}
+          </button>
+          <div *ngIf="hasApplied" class="status-badge ACTIVE">Application submitted</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>

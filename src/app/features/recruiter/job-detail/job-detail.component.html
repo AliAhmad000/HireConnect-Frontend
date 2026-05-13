@@ -1,0 +1,235 @@
+<!-- src/app/features/recruiter/job-detail/job-detail.component.html -->
+<div class="job-detail-container">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading job details...</p>
+  </div>
+
+  <div *ngIf="!isLoading && job">
+    <!-- Back Navigation -->
+    <a routerLink="/recruiter/jobs" class="back-link"><span class="material-symbols-rounded">arrow_back</span> Back to Jobs</a>
+    
+    <!-- Job Header Card -->
+    <div class="job-header-card">
+      <div class="header-top">
+        <img
+          *ngIf="recruiterLogoUrl; else detailCompanyInitials"
+          [src]="recruiterLogoUrl"
+          alt="Company logo"
+          class="company-logo"
+        >
+        <ng-template #detailCompanyInitials>
+          <div class="company-logo initials">{{ getCompanyInitials() }}</div>
+        </ng-template>
+        <div class="header-info">
+          <h1>{{ job.title }}</h1>
+          <p class="company-name">{{ getCompanyName() }}</p>
+        </div>
+        <span class="status-badge" [class]="job.status.toLowerCase()">
+          {{ job.status }}
+        </span>
+      </div>
+      
+      <div class="job-meta">
+        <div class="meta-item">
+          <span class="material-symbols-rounded meta-icon">location_on</span>
+          <span>{{ job.location }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="material-symbols-rounded meta-icon">business_center</span>
+          <span>{{ job.jobType.replace('_', ' ') }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="material-symbols-rounded meta-icon">payments</span>
+          <span>{{ job.salaryMin | currency }} - {{ job.salaryMax | currency }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="material-symbols-rounded meta-icon">track_changes</span>
+          <span>{{ job.experienceRequired }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="material-symbols-rounded meta-icon">calendar_today</span>
+          <span>Posted {{ job.postedAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div class="skills-section" *ngIf="job.skills.length">
+        <h4>Required Skills</h4>
+        <div class="skills-list">
+          <span class="skill-tag" *ngFor="let skill of job.skills">
+            {{ skill }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn-action primary" (click)="editJob()">
+          <span class="material-symbols-rounded">edit</span>
+          Edit Job
+        </button>
+        <button class="btn-action" (click)="viewApplications()">
+          <span class="material-symbols-rounded">assignment</span>
+          View Applications ({{ applications.length }})
+        </button>
+        <button *ngIf="job.status === 'ACTIVE'" class="btn-action warning" (click)="pauseJob()">
+          <span class="material-symbols-rounded">pause</span>
+          Pause
+        </button>
+        <button *ngIf="job.status !== 'CLOSED'" class="btn-action danger" (click)="closeJob()">
+          <span class="material-symbols-rounded">block</span>
+          Close
+        </button>
+        <button class="btn-action delete" (click)="deleteJob()">
+          <span class="material-symbols-rounded">delete</span>
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Analytics Overview -->
+    <div class="analytics-section" *ngIf="analytics">
+      <h2>Job Performance</h2>
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <div class="analytics-icon"><span class="material-symbols-rounded">visibility</span></div>
+          <div class="analytics-content">
+            <span class="analytics-number">{{ analytics.views || 0 }}</span>
+            <span class="analytics-label">Total Views</span>
+          </div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-icon"><span class="material-symbols-rounded">description</span></div>
+          <div class="analytics-content">
+            <span class="analytics-number">{{ analytics.applications || 0 }}</span>
+            <span class="analytics-label">Applications</span>
+          </div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-icon"><span class="material-symbols-rounded">monitoring</span></div>
+          <div class="analytics-content">
+            <span class="analytics-number">{{ analytics.conversionRate || 0 }}%</span>
+            <span class="analytics-label">Conversion Rate</span>
+          </div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-icon"><span class="material-symbols-rounded">star</span></div>
+          <div class="analytics-content">
+            <span class="analytics-number">{{ analytics.shortlisted || 0 }}</span>
+            <span class="analytics-label">Shortlisted</span>
+          </div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-icon"><span class="material-symbols-rounded">event</span></div>
+          <div class="analytics-content">
+            <span class="analytics-number">{{ analytics.interviews || 0 }}</span>
+            <span class="analytics-label">Interviews</span>
+          </div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-icon"><span class="material-symbols-rounded">workspace_premium</span></div>
+          <div class="analytics-content">
+            <span class="analytics-number">{{ analytics.offered || 0 }}</span>
+            <span class="analytics-label">Offered</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hiring Pipeline -->
+    <div class="pipeline-section" *ngIf="analytics && analytics.applications > 0">
+      <h2>Hiring Pipeline</h2>
+      <div class="pipeline-visualization">
+        <div class="pipeline-stage" *ngFor="let stage of pipelineStages">
+          <div class="stage-header">
+            <span class="stage-label">{{ stage.label }}</span>
+            <span class="stage-count">{{ getApplicationCountByStatus(stage.key) }}</span>
+          </div>
+          <div class="stage-bar-container">
+            <div 
+              class="stage-bar" 
+              [style.width.%]="getPipelinePercentage(stage.key)"
+              [style.background-color]="stage.color"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Description -->
+    <div class="content-section" *ngIf="job.description">
+      <h2>Job Description</h2>
+      <div class="description-content">
+        {{ job.description }}
+      </div>
+    </div>
+
+   
+
+    <!-- Recent Applications -->
+    <div class="applications-section">
+      <div class="section-header">
+        <h2>Recent Applications</h2>
+        <button class="btn-link" (click)="viewApplications()">
+          View All ({{ applications.length }}) →
+        </button>
+      </div>
+      
+      <div class="applications-list" *ngIf="applications.length > 0">
+        <div class="application-item" *ngFor="let app of applications.slice(0, 5)">
+          <div class="candidate-info">
+            <div class="avatar">
+              {{ app.candidate?.fullName?.charAt(0)?.toUpperCase() || '?' }}
+            </div>
+            <div class="candidate-details">
+              <span class="candidate-name">{{ app.candidate?.fullName }}</span>
+              <span class="candidate-email">{{ app.candidate?.email }}</span>
+              <span class="applied-date">Applied: {{ app.appliedAt | date:'mediumDate' }}</span>
+            </div>
+          </div>
+          
+          <div class="application-status">
+            <span class="status-badge" [class]="getStatusClass(app.status)">
+              {{ app.status.replace('_', ' ') }}
+            </span>
+          </div>
+          
+          <div class="application-actions">
+            <button 
+              class="btn-icon" 
+              title="Download Resume"
+              (click)="downloadResume(app)">
+              <span class="material-symbols-rounded">description</span>
+            </button>
+            <button 
+              *ngIf="app.status === 'APPLIED'"
+              class="btn-icon" 
+              title="Shortlist"
+              (click)="shortlistCandidate(app.applicationId)">
+              <span class="material-symbols-rounded">star</span>
+            </button>
+            <a 
+              [routerLink]="['/recruiter/applications', app.applicationId]"
+              class="btn-icon" 
+              title="View Details">
+              <span class="material-symbols-rounded">visibility</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="empty-state" *ngIf="applications.length === 0">
+        <div class="empty-icon"><span class="material-symbols-rounded">assignment</span></div>
+        <h3>No Applications Yet</h3>
+        <p>Share your job posting to attract candidates</p>
+        <div class="share-buttons">
+          <button class="btn-share"><span class="material-symbols-rounded">mail</span> Share via Email</button>
+          <button class="btn-share"><span class="material-symbols-rounded">link</span> Copy Link</button>
+          <button class="btn-share"><span class="material-symbols-rounded">business_center</span> Share on LinkedIn</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

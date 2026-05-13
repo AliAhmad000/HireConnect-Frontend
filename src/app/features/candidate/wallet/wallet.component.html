@@ -1,0 +1,134 @@
+<div class="wallet-container">
+  <div class="page-header">
+    <div>
+      <span class="hc-eyebrow">Wallet</span>
+      <h1>My wallet</h1>
+      <p>Balance, top-ups, and transaction history now live inside a cleaner financial panel.</p>
+    </div>
+  </div>
+
+  <section class="balance-card hc-glass">
+    <div class="balance-content">
+      <div class="balance-info">
+        <span class="balance-label">Available balance</span>
+        <span class="balance-amount">{{ balance | currency }}</span>
+      </div>
+      <button class="btn-primary" (click)="openAddMoneyForm()">
+        <span class="material-symbols-rounded">add</span>
+        Add money
+      </button>
+    </div>
+    <div class="balance-stats">
+      <div class="summary-card hc-glass">
+        <span>Total deposits</span>
+        <strong>{{ getTotalDeposits() | currency }}</strong>
+      </div>
+      <div class="summary-card hc-glass">
+        <span>Total spent</span>
+        <strong>{{ getTotalSpent() | currency }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <div class="add-money-form" *ngIf="showAddMoneyForm">
+    <div class="form-overlay" (click)="closeAddMoneyForm()"></div>
+    <div class="form-content hc-glass hc-glass--strong">
+      <div class="page-header">
+        <div>
+          <h2>Add money to wallet</h2>
+          <p>Quick funding still follows your current wallet logic.</p>
+        </div>
+        <button class="btn-outline-sm" (click)="closeAddMoneyForm()">Close</button>
+      </div>
+
+      <div class="hc-form-grid">
+        <label class="hc-field full-width">
+          Amount
+          <input type="number" [(ngModel)]="addAmount" placeholder="0.00" min="10" step="0.01">
+        </label>
+
+        <div class="full-width">
+          <label>Quick amounts</label>
+          <div class="filter-tabs">
+            <button *ngFor="let amount of [25, 50, 100, 200, 500]" class="quick-amount" [class.active]="addAmount === amount" (click)="addAmount = amount">
+              {{ amount | currency:'INR':'symbol':'1.0-0' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="full-width">
+          <label>Payment method</label>
+          <div class="payment-options">
+            <label class="payment-method" *ngFor="let method of paymentMethods" [class.selected]="selectedPaymentMethod === method.id">
+              <input type="radio" name="paymentMethod" [value]="method.id" [(ngModel)]="selectedPaymentMethod" style="display: none;">
+              <span class="material-symbols-rounded method-icon">{{ method.icon }}</span>
+              <span class="method-name">{{ method.name }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="hc-section full-width">
+          <div class="summary-row">
+            <span>Amount</span>
+            <span>{{ (addAmount || 0) | currency }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Fee</span>
+            <span class="free">Free</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>{{ (addAmount || 0) | currency }}</span>
+          </div>
+        </div>
+
+        <button class="btn-primary full-width" (click)="addMoney()" [disabled]="!addAmount || addAmount < 10 || isAddingMoney">
+          {{ isAddingMoney ? 'Processing...' : 'Add Money' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <section class="transactions-section hc-glass">
+    <div class="section-header">
+      <div>
+        <h2>Transaction history</h2>
+        <p>Filter the wallet ledger by transaction type.</p>
+      </div>
+    </div>
+
+    <div class="filter-tabs">
+      <button *ngFor="let filter of ['ALL', 'DEPOSIT', 'WITHDRAWAL', 'PAYMENT']" class="filter-tab" [class.active]="activeFilter === filter" (click)="filterTransactions(filter)">
+        {{ filter === 'ALL' ? 'All' : filter }}
+      </button>
+    </div>
+
+    <div class="transactions-list">
+      <article class="transaction-item hc-glass" *ngFor="let transaction of filteredTransactions" [class]="getTransactionColor(transaction.type)">
+        <div class="transaction-icon">
+          <span class="material-symbols-rounded">{{ getTransactionIcon(transaction.type) }}</span>
+        </div>
+
+        <div class="transaction-info">
+          <span class="transaction-description">{{ transaction.description }}</span>
+          <span class="transaction-date">{{ transaction.date | date:'mediumDate' }} at {{ transaction.date | date:'shortTime' }}</span>
+        </div>
+
+        <div class="transaction-amount">
+          <span class="amount" [class.positive]="transaction.amount > 0">
+            {{ transaction.amount > 0 ? '+' : '' }}{{ transaction.amount | currency }}
+          </span>
+          <span class="status" [class]="getStatusClass(transaction.status)">
+            {{ transaction.status }}
+          </span>
+        </div>
+      </article>
+
+      <div class="empty-state" *ngIf="filteredTransactions.length === 0">
+        <div class="empty-icon"><span class="material-symbols-rounded">receipt_long</span></div>
+        <h3>No transactions</h3>
+        <p>No {{ activeFilter === 'ALL' ? '' : activeFilter.toLowerCase() }} transactions found.</p>
+      </div>
+    </div>
+  </section>
+</div>

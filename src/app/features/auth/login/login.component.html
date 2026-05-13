@@ -1,0 +1,102 @@
+<section class="hc-auth">
+  <div class="hc-auth-shell">
+    <article class="hc-auth-panel hc-glass hc-glass--strong">
+      <span class="hc-eyebrow">
+        <span class="material-symbols-rounded">login</span>
+        Secure sign in
+      </span>
+      <h1>Return to your hiring workspace.</h1>
+      <p class="hc-page-subtitle">
+        Candidate dashboards, recruiter pipelines, and admin controls now sit behind one calmer entry point with clearer next actions.
+      </p>
+
+      <div class="hc-auth-benefits">
+        <div class="hc-auth-benefit">
+          <span class="material-symbols-rounded">travel_explore</span>
+          <div>
+            <strong>Search faster</strong>
+            <span>Jump straight into live jobs and saved role tracking.</span>
+          </div>
+        </div>
+        <div class="hc-auth-benefit">
+          <span class="material-symbols-rounded">dashboard</span>
+          <div>
+            <strong>Manage your hiring workspace</strong>
+            <span>Every role lands in a dedicated workspace instead of generic screens.</span>
+          </div>
+        </div>
+        <div class="hc-auth-benefit">
+          <span class="material-symbols-rounded">shield_lock</span>
+          <div>
+            <strong>Protected access</strong>
+            <span>Session handling, notifications, and profile controls stay connected to your existing backend flow.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hc-auth-quote">
+        <strong>Fresh visual system.</strong>
+        <p>The light-blue glass redesign keeps the logic intact while completely changing the mood and navigation rhythm.</p>
+      </div>
+    </article>
+
+    <article class="hc-auth-card hc-glass">
+      <div>
+        <span class="hc-eyebrow">Access</span>
+        <h2>Welcome back</h2>
+        <p class="hc-page-subtitle">Sign in to continue where your hiring flow left off.</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="hc-form-grid">
+        <div class="hc-field full-width">
+          <label for="email">Email Address</label>
+          <input id="email" type="email" formControlName="email" placeholder="you@company.com">
+          <div class="error-message" *ngIf="email?.invalid && email?.touched">
+            <span *ngIf="email?.errors?.['required']">Email is required</span>
+            <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+          </div>
+        </div>
+
+        <div class="hc-field full-width">
+          <label for="password">Password</label>
+          <div class="hc-search-field">
+            <span class="material-symbols-rounded">lock</span>
+            <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter your password">
+            <button type="button" class="legal-link" (click)="togglePasswordVisibility()">
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          <div class="error-message" *ngIf="password?.invalid && password?.touched">
+            <span *ngIf="password?.errors?.['required']">Password is required</span>
+            <span *ngIf="password?.errors?.['passwordStrength']">Use 8+ chars with uppercase, lowercase, number, and symbol</span>
+          </div>
+        </div>
+
+        <div class="full-width hc-page-header">
+          <label class="remember-row">
+            <input id="remember-me" type="checkbox" formControlName="rememberMe">
+            <span>Remember me</span>
+          </label>
+          <a routerLink="/auth/forgot-password" class="legal-link">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary full-width" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Enter Workspace</span>
+          <span *ngIf="isLoading" class="animate-spin"></span>
+        </button>
+      </form>
+
+      <div class="auth-divider"><span>or continue with</span></div>
+
+      <button (click)="loginWithGitHub()" type="button" class="btn-outline full-width">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
+        Continue with GitHub
+      </button>
+
+      <p class="auth-footer-copy">
+        Don’t have an account?
+        <a routerLink="/auth/register" class="legal-link">Create one now</a>
+      </p>
+    </article>
+  </div>
+</section>

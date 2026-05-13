@@ -1,0 +1,55 @@
+<div class="applications-container">
+  <div class="page-header">
+    <div>
+      <span class="hc-eyebrow">Application tracker</span>
+      <h1>My applications</h1>
+      <p>Filter your pipeline by state and review every submission from a single glass table.</p>
+    </div>
+  </div>
+
+  <div class="status-filter">
+    <button *ngFor="let status of statuses" class="filter-btn" [class.active]="selectedStatus === status" (click)="filterApplications(status)">
+      {{ status === 'ALL' ? 'All' : status.replace('_', ' ') }}
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading applications...</p>
+  </div>
+
+  <div class="table-responsive hc-glass" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Company</th>
+          <th>Applied</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of filteredApplications">
+          <td><a [routerLink]="['/jobs', app.jobId]">{{ app.job?.title || app.jobTitle }}</a></td>
+          <td>{{ app.job?.companyName || app.companyName }}</td>
+          <td>{{ app.appliedAt | date:'mediumDate' }}</td>
+          <td><span [class]="getStatusClass(app.status)">{{ app.status.replace('_', ' ') }}</span></td>
+          <td>
+            <div class="action-buttons">
+              <a [routerLink]="['/jobs', app.jobId]" class="btn-outline-sm">View Job</a>
+              <button *ngIf="app.status === 'APPLIED'" class="btn-action danger" (click)="withdrawApplication(app.applicationId)">
+                Withdraw
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredApplications.length === 0">
+      <p>No applications found for this filter.</p>
+      <a routerLink="/candidate/jobs" class="btn-primary">Browse Jobs</a>
+    </div>
+  </div>
+</div>

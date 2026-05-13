@@ -1,0 +1,268 @@
+<!-- src/app/features/recruiter/application-detail/application-detail.component.html -->
+<div class="application-detail-container">
+  <div class="page-header">
+    <a routerLink="/recruiter/applications" class="back-link">
+      <span class="material-symbols-rounded">arrow_back</span>
+      Back to Applications
+    </a>
+    <div class="header-content">
+      <div>
+        <h1>Application Details</h1>
+        <p *ngIf="application">{{ getCandidateName() }} for {{ getJobTitle() }}</p>
+        <p *ngIf="!application">Review candidate profile, status and interview activity</p>
+      </div>
+      <button class="btn-resume header-resume" type="button" (click)="downloadResume()" *ngIf="!isLoading && application">
+        <span class="material-symbols-rounded">description</span>
+        View Resume
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading application details...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && !application">
+    <h3>Application Not Available</h3>
+    <p>{{ errorMessage || 'This application could not be loaded.' }}</p>
+    <a routerLink="/recruiter/applications" class="btn-primary">Back to Applications</a>
+  </div>
+
+  <div class="detail-content" *ngIf="!isLoading && application">
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-icon candidate"><span class="material-symbols-rounded">person</span></div>
+        <div>
+          <span>Candidate</span>
+          <strong>{{ getCandidateName() }}</strong>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon job"><span class="material-symbols-rounded">work</span></div>
+        <div>
+          <span>Job Applied</span>
+          <strong>{{ getJobTitle() }}</strong>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon status"><span class="material-symbols-rounded">flag</span></div>
+        <div>
+          <span>Status</span>
+          <strong>{{ application.status.replace('_', ' ') }}</strong>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon interview"><span class="material-symbols-rounded">event</span></div>
+        <div>
+          <span>Interviews</span>
+          <strong>{{ interviews.length | number }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <!-- Candidate Info -->
+      <div class="detail-section">
+        <div class="section-header">
+          <h2>Candidate Information</h2>
+          <span class="status-badge" [class]="application.status.toLowerCase()">
+            {{ application.status.replace('_', ' ') }}
+          </span>
+        </div>
+        <div class="candidate-profile">
+          <div class="avatar-large">
+            {{ getCandidateName().charAt(0).toUpperCase() }}
+          </div>
+          <div class="profile-info">
+            <h3>{{ getCandidateName() }}</h3>
+            <p><span class="material-symbols-rounded">mail</span>{{ getCandidateEmail() }}</p>
+            <p><span class="material-symbols-rounded">call</span>{{ getCandidateMobile() }}</p>
+          </div>
+        </div>
+
+        <div class="skills-section" *ngIf="getCandidateSkills().length > 0">
+          <h4>Skills</h4>
+          <div class="skills-list">
+            <span class="skill-tag" *ngFor="let skill of getCandidateSkills()">
+              {{ skill }}
+            </span>
+          </div>
+        </div>
+        <button class="btn-resume" type="button" (click)="downloadResume()">
+          <span class="material-symbols-rounded">description</span>
+          View Resume
+        </button>
+      </div>
+
+      <!-- Application Info -->
+      <div class="detail-section">
+        <div class="section-header">
+          <h2>Application Details</h2>
+        </div>
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-icon material-symbols-rounded">work</span>
+            <div>
+              <span class="label">Job Applied</span>
+              <a [routerLink]="['/jobs', application.jobId]" class="value link">{{ getJobTitle() }}</a>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="info-icon material-symbols-rounded">business</span>
+            <div>
+              <span class="label">Company</span>
+              <span class="value">{{ getCompanyName() }}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="info-icon material-symbols-rounded">calendar_month</span>
+            <div>
+              <span class="label">Applied Date</span>
+              <span class="value">{{ application.appliedAt | date:'medium' }}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="info-icon material-symbols-rounded">assignment</span>
+            <div>
+              <span class="label">Application ID</span>
+              <span class="value">{{ application.applicationId }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cover-letter" *ngIf="application.coverLetter">
+          <h4>Cover Letter</h4>
+          <p>{{ application.coverLetter }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-panel">
+      <div>
+        <h2>Recruiter Actions</h2>
+        <p>Move the candidate through your hiring workflow.</p>
+      </div>
+    <div class="action-buttons">
+      <button class="btn-action primary" (click)="updateStatus('SHORTLISTED')" [disabled]="!canMoveToStatus('SHORTLISTED')" [title]="getStatusActionTitle('SHORTLISTED')">
+        <span class="material-symbols-rounded">star</span>
+        Shortlist
+      </button>
+      <button class="btn-action" (click)="openScheduler()" [disabled]="!canOpenScheduler()" [title]="getSchedulerActionTitle()">
+        <span class="material-symbols-rounded">event</span>
+        {{ getSchedulerActionLabel() }}
+      </button>
+      <button class="btn-action success" (click)="updateStatus('OFFERED')" [disabled]="!canMoveToStatus('OFFERED')" [title]="getStatusActionTitle('OFFERED')">
+        <span class="material-symbols-rounded">workspace_premium</span>
+        Make Offer
+      </button>
+      <button class="btn-action danger" (click)="updateStatus('REJECTED')" [disabled]="!canMoveToStatus('REJECTED')" [title]="getStatusActionTitle('REJECTED')">
+        <span class="material-symbols-rounded">close</span>
+        Reject
+      </button>
+    </div>
+    </div>
+
+    <!-- Candidate Messaging -->
+    <div class="message-section">
+      <div class="section-header">
+        <h2>Message Candidate</h2>
+        <span class="material-symbols-rounded">chat</span>
+      </div>
+      <p class="message-helper" *ngIf="canMessageCandidate()">Send a portal message to {{ getCandidateName() }} about this application.</p>
+      <p class="message-helper warning" *ngIf="!canMessageCandidate()">Messaging is available after the candidate is shortlisted, scheduled for interview, or offered.</p>
+      <textarea
+        [(ngModel)]="candidateMessage"
+        rows="4"
+        maxlength="1000"
+        [disabled]="!canMessageCandidate() || isSendingMessage"
+        placeholder="Write your message..."
+      ></textarea>
+      <div class="message-actions">
+        <span>{{ candidateMessage.length }}/1000</span>
+        <button class="btn-primary" type="button" [disabled]="!canMessageCandidate() || isSendingMessage" (click)="sendMessageToCandidate()">
+          <span class="material-symbols-rounded">send</span>
+          {{ isSendingMessage ? 'Sending...' : 'Send Message' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Interviews List -->
+    <div class="interviews-section" *ngIf="interviews.length > 0">
+      <div class="section-header">
+        <h2>Interviews</h2>
+        <span>{{ interviews.length }} records</span>
+      </div>
+      <div class="interview-card" *ngFor="let interview of interviews" [class.requires-action]="interview.requestedScheduledAt">
+        <div class="interview-header">
+          <div class="interview-date">
+            <span class="material-symbols-rounded">event</span>
+            <h4>{{ interview.scheduledAt | date:'medium' }}</h4>
+          </div>
+          <span class="status-badge" [class]="interview.status.toLowerCase()">{{ interview.status.replace('_', ' ') }}</span>
+        </div>
+        <div class="interview-details">
+          <p><span class="material-symbols-rounded">videocam</span><strong>Mode:</strong> {{ interview.mode }}</p>
+          <p *ngIf="interview.meetLink"><span class="material-symbols-rounded">link</span><strong>Link:</strong> <a [href]="interview.meetLink" target="_blank">{{ interview.meetLink }}</a></p>
+          <p *ngIf="interview.location"><span class="material-symbols-rounded">location_on</span><strong>Location:</strong> {{ interview.location }}</p>
+          <p *ngIf="interview.requestedScheduledAt" class="request-note"><span class="material-symbols-rounded">schedule</span><strong>Requested Date:</strong> {{ interview.requestedScheduledAt | date:'medium' }}</p>
+          <p *ngIf="interview.rescheduleReason" class="request-note"><span class="material-symbols-rounded">notes</span><strong>Reschedule Reason:</strong> {{ interview.rescheduleReason }}</p>
+        </div>
+        
+        <div class="interview-actions" *ngIf="interview.requestedScheduledAt || ['SCHEDULED', 'CONFIRMED', 'RESCHEDULED'].includes(interview.status)">
+          <button class="btn-action primary" (click)="openRescheduler(interview)" *ngIf="interview.requestedScheduledAt">
+            <span class="material-symbols-rounded">check_circle</span>
+            Approve & Reschedule
+          </button>
+          <button class="btn-action danger" (click)="rejectReschedule(interview)" *ngIf="interview.requestedScheduledAt">
+            <span class="material-symbols-rounded">block</span>
+            Decline Request
+          </button>
+          <button class="btn-action" (click)="openRescheduler(interview)" *ngIf="!interview.requestedScheduledAt">
+            <span class="material-symbols-rounded">edit_calendar</span>
+            Reschedule
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interview Scheduler -->
+    <div class="interview-scheduler" *ngIf="schedulerOpen">
+      <div class="section-header">
+        <h3>{{ schedulerMode === 'reschedule' ? 'Reschedule Interview' : 'Schedule Interview' }}</h3>
+        <span class="material-symbols-rounded">event_available</span>
+      </div>
+      <div class="form-group">
+        <label>Date & Time</label>
+        <input type="datetime-local" [(ngModel)]="interviewForm.scheduledAt" [min]="getMinimumDateTime()">
+      </div>
+      <div class="form-group">
+        <label>Mode</label>
+        <select [(ngModel)]="interviewForm.mode">
+          <option value="ONLINE">Online</option>
+          <option value="IN_PERSON">In Person</option>
+        </select>
+      </div>
+      <div class="form-group" *ngIf="interviewForm.mode === 'ONLINE'">
+        <label>Meeting Link</label>
+        <input type="url" [(ngModel)]="interviewForm.meetLink" placeholder="https://meet.google.com/...">
+      </div>
+      <div class="form-group" *ngIf="interviewForm.mode === 'IN_PERSON'">
+        <label>Location</label>
+        <input type="text" [(ngModel)]="interviewForm.location" placeholder="Office address">
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea [(ngModel)]="interviewForm.notes" rows="3" placeholder="Any additional information..."></textarea>
+      </div>
+      <div class="scheduler-actions">
+        <button class="btn-primary" (click)="scheduleInterview()">
+          <span class="material-symbols-rounded">check</span>
+          {{ schedulerMode === 'reschedule' ? 'Save New Time' : 'Schedule' }}
+        </button>
+        <button class="btn-outline" (click)="closeScheduler()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

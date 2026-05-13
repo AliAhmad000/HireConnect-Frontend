@@ -1,0 +1,133 @@
+<div class="post-job-container">
+  <div class="page-header">
+    <div>
+      <span class="hc-eyebrow">Job composer</span>
+      <h1>{{ isEditMode ? 'Edit job posting' : 'Post a new job' }}</h1>
+      <p>{{ isEditMode ? 'Update your role details inside the new recruiter composer.' : 'Create a role with a cleaner, form-first flow built on the same backend fields.' }}</p>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoadingJob">
+    <div class="spinner"></div>
+    <p>Loading job details...</p>
+  </div>
+
+  <form [formGroup]="jobForm" (ngSubmit)="onSubmit()" *ngIf="!isLoadingJob" class="hc-feed">
+    <section class="form-section hc-glass">
+      <h2>Basic information</h2>
+
+      <div class="company-preview hc-glass">
+        <img *ngIf="recruiterLogoUrl; else companyInitialsTpl" [src]="recruiterLogoUrl" alt="Company logo" class="company-logo">
+        <ng-template #companyInitialsTpl>
+          <div class="company-logo initials">{{ companyInitials }}</div>
+        </ng-template>
+        <div>
+          <span class="preview-label">Posting as</span>
+          <strong>{{ companyName?.value || recruiterCompanyName || 'Your company' }}</strong>
+        </div>
+      </div>
+
+      <div class="hc-form-grid">
+        <label class="hc-field full-width">
+          Job title
+          <input type="text" id="title" formControlName="title" placeholder="e.g., Senior Frontend Developer">
+          <div class="error-message" *ngIf="title?.invalid && title?.touched">
+            <span *ngIf="title?.errors?.['required']">Job title is required</span>
+            <span *ngIf="title?.errors?.['minlength']">Title must be at least 5 characters</span>
+          </div>
+        </label>
+
+        <label class="hc-field">
+          Category
+          <select id="category" formControlName="category">
+            <option value="">Select category</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </label>
+
+        <label class="hc-field">
+          Job type
+          <select id="type" formControlName="type">
+            <option *ngFor="let type of jobTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </label>
+
+        <label class="hc-field full-width">
+          Location
+          <input type="text" id="location" formControlName="location" placeholder="e.g., Bengaluru or Remote">
+        </label>
+
+        <label class="hc-field">
+          Company name
+          <input type="text" id="companyName" formControlName="companyName" placeholder="Enter company name">
+        </label>
+
+        <label class="hc-field">
+          Vacancies
+          <input type="number" id="vacancies" formControlName="vacancies" min="1">
+        </label>
+
+        <label class="hc-field">
+          Minimum salary
+          <input type="number" id="salaryMin" formControlName="salaryMin" placeholder="Minimum salary">
+        </label>
+
+        <label class="hc-field">
+          Maximum salary
+          <input type="number" id="salaryMax" formControlName="salaryMax" placeholder="Maximum salary">
+        </label>
+
+        <label class="hc-field">
+          Expiry date
+          <input type="date" id="expiresAt" formControlName="expiresAt">
+        </label>
+
+        <label class="hc-field">
+          Experience level
+          <select id="experience" formControlName="experienceRequired">
+            <option value="">Select experience level</option>
+            <option *ngFor="let level of experienceLevels" [value]="level">{{ level }}</option>
+          </select>
+        </label>
+
+        <label class="remember-row full-width">
+          <input type="checkbox" formControlName="isRemote">
+          <span>Remote job</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="form-section hc-glass">
+      <h2>Required skills</h2>
+      <div formArrayName="skills">
+        <div class="skill-list">
+          <span class="pill" *ngFor="let skill of skills.controls; let i = index">
+            {{ skill.value }}
+            <button type="button" class="legal-link" (click)="removeSkill(i)">Remove</button>
+          </span>
+        </div>
+
+        <div class="hc-form-grid" style="margin-top: 16px;">
+          <input type="text" #skillInput placeholder="Type a skill and press Enter" (keyup.enter)="addSkillFromInput(skillInput)">
+          <button type="button" class="btn-outline" (click)="addSkillFromInput(skillInput)">Add skill</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section hc-glass">
+      <h2>Job description</h2>
+      <label class="hc-field">
+        Description
+        <textarea id="description" formControlName="description" rows="7" placeholder="Describe the role, responsibilities, and impact."></textarea>
+        <small class="char-count">{{ description?.value?.length || 0 }} characters</small>
+      </label>
+    </section>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update Job' : 'Post Job' }}</span>
+        <span *ngIf="isSubmitting">Saving...</span>
+      </button>
+    </div>
+  </form>
+</div>

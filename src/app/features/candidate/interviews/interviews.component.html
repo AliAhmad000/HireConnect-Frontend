@@ -1,0 +1,107 @@
+<div class="interviews-container">
+  <div class="page-header">
+    <div>
+      <span class="hc-eyebrow">Interview calendar</span>
+      <h1>My interviews</h1>
+      <p>Manage upcoming sessions and review past interviews with a new timeline-first layout.</p>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading interviews...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="hc-feed">
+    <section class="interviews-section hc-glass">
+      <div class="section-header">
+        <div>
+          <h2>Upcoming interviews</h2>
+          <p>Requests, confirmations, and join links stay close to each interview card.</p>
+        </div>
+      </div>
+
+      <div class="interviews-list">
+        <article class="interview-card hc-glass" *ngFor="let interview of upcomingInterviews">
+          <div class="hc-page-header">
+            <div class="interview-date">
+              <div>
+                <strong>{{ interview.scheduledAt | date:'dd' }}</strong>
+                <small>{{ interview.scheduledAt | date:'MMM yyyy' }}</small>
+              </div>
+            </div>
+            <div>
+              <h3>{{ interview.jobTitle || interview.application?.job?.title || 'Interview' }}</h3>
+              <p>{{ interview.companyName || interview.application?.job?.companyName || 'Company not specified' }}</p>
+            </div>
+            <span class="status-badge" [class]="interview.status.toLowerCase()">{{ interview.status }}</span>
+          </div>
+
+          <div class="hc-stat-row">
+            <span><span class="material-symbols-rounded">{{ interview.mode === 'ONLINE' ? 'videocam' : 'apartment' }}</span>{{ interview.mode === 'ONLINE' ? 'Online' : 'In-Person' }}</span>
+            <span><span class="material-symbols-rounded">schedule</span>{{ interview.scheduledAt | date:'h:mm a' }}</span>
+            <span *ngIf="interview.location"><span class="material-symbols-rounded">location_on</span>{{ interview.location }}</span>
+            <span *ngIf="interview.requestedScheduledAt"><span class="material-symbols-rounded">update</span>Requested {{ interview.requestedScheduledAt | date:'medium' }}</span>
+          </div>
+
+          <p class="muted" *ngIf="interview.notes"><strong>Notes:</strong> {{ interview.notes }}</p>
+          <p class="muted" *ngIf="interview.status === 'RESCHEDULE_REQUESTED' && interview.rescheduleReason"><strong>Reschedule request:</strong> {{ interview.rescheduleReason }}</p>
+
+          <form class="hc-form-grid" *ngIf="rescheduleInterviewId === interview.interviewId" (ngSubmit)="submitRescheduleRequest()">
+            <label class="hc-field full-width">
+              New date & time
+              <input type="datetime-local" name="newScheduledAt" [(ngModel)]="rescheduleForm.newScheduledAt" [min]="getMinimumDateTime()" required>
+            </label>
+            <label class="hc-field full-width">
+              Reason
+              <textarea name="rescheduleReason" [(ngModel)]="rescheduleForm.rescheduleReason" rows="3" required></textarea>
+            </label>
+            <p class="error-message full-width" *ngIf="rescheduleError">{{ rescheduleError }}</p>
+            <div class="form-actions full-width">
+              <button type="submit" class="btn-primary" [disabled]="isSubmittingReschedule">{{ isSubmittingReschedule ? 'Sending...' : 'Send Request' }}</button>
+              <button type="button" class="btn-outline" (click)="cancelRescheduleRequest()" [disabled]="isSubmittingReschedule">Close</button>
+            </div>
+          </form>
+
+          <div class="interview-actions">
+            <a *ngIf="interview.meetLink" [href]="interview.meetLink" target="_blank" class="btn-primary-sm">Join Meeting</a>
+            <button *ngIf="interview.status === 'SCHEDULED'" class="btn-outline-sm" (click)="confirmInterview(interview.interviewId)">Confirm</button>
+            <button class="btn-outline-sm" *ngIf="interview.status !== 'RESCHEDULE_REQUESTED' && !interview.requestedScheduledAt" (click)="openRescheduleRequest(interview)">Request Reschedule</button>
+            <button class="btn-action danger" (click)="cancelInterview(interview.interviewId)">Cancel</button>
+          </div>
+        </article>
+
+        <div class="empty-state" *ngIf="upcomingInterviews.length === 0">
+          <p>No upcoming interviews scheduled</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="interviews-section hc-glass" *ngIf="pastInterviews.length > 0">
+      <div class="section-header">
+        <div>
+          <h2>Past interviews</h2>
+          <p>Completed interview history stays available for reference.</p>
+        </div>
+      </div>
+
+      <div class="interviews-list">
+        <article class="interview-card hc-glass" *ngFor="let interview of pastInterviews">
+          <div class="hc-page-header">
+            <div class="interview-date">
+              <div>
+                <strong>{{ interview.scheduledAt | date:'dd' }}</strong>
+                <small>{{ interview.scheduledAt | date:'MMM yyyy' }}</small>
+              </div>
+            </div>
+            <div>
+              <h3>{{ interview.jobTitle || interview.application?.job?.title || 'Interview' }}</h3>
+              <p>{{ interview.companyName || interview.application?.job?.companyName || 'Company not specified' }}</p>
+            </div>
+            <span class="status-badge" [class]="interview.status.toLowerCase()">{{ interview.status }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>

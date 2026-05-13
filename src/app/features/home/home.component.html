@@ -1,0 +1,203 @@
+<main class="home-page">
+  <section class="hc-home-hero">
+    <article class="hc-hero-card hc-glass hc-glass--strong">
+      <div class="hero-brand-copy">
+        <span class="hc-eyebrow hero-brand-copy__eyebrow">
+          <span class="material-symbols-rounded">work</span>
+          Hiring starts here
+        </span>
+        <h1>
+          <span>Hire</span>
+          <span>Connect</span>
+        </h1>
+        <p class="hc-page-subtitle">
+          Find the right role faster with a focused hiring platform for candidates, recruiters, and active opportunities.
+        </p>
+      </div>
+
+      <form class="hc-search-inline" (submit)="search($event)">
+        <label class="hc-search-field">
+          <span class="material-symbols-rounded">search</span>
+          <input
+            type="text"
+            [formControl]="searchControl"
+            placeholder="Role, stack, or company"
+            autocomplete="off">
+        </label>
+
+        <label class="hc-search-field">
+          <span class="material-symbols-rounded">location_on</span>
+          <input
+            type="text"
+            [formControl]="locationControl"
+            placeholder="City, state, or remote"
+            autocomplete="off">
+        </label>
+
+        <button class="btn-primary" type="submit">
+          <span class="material-symbols-rounded">arrow_outward</span>
+          Launch Search
+        </button>
+      </form>
+
+      <div class="hero-actions">
+        <button type="button" class="btn-outline" (click)="getStarted()">
+          <span class="material-symbols-rounded">person_add</span>
+          Candidate Access
+        </button>
+        <button type="button" class="btn-primary" (click)="postJob()">
+          <span class="material-symbols-rounded">add_business</span>
+          Recruiter Setup
+        </button>
+      </div>
+
+      <div class="hero-popular" *ngIf="popularSearches.length">
+        <span>Trending paths</span>
+        <div class="hero-popular__list">
+          <button type="button" *ngFor="let search of popularSearches" (click)="searchPopular(search)">
+            <span class="material-symbols-rounded">{{ search.icon }}</span>
+            {{ search.label }}
+            <small>{{ search.count }}</small>
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <aside class="hc-hero-card hc-glass">
+      <div class="hero-side__head">
+        <div>
+          <span class="hc-eyebrow">Live platform state</span>
+          <h2>Marketplace pulse</h2>
+        </div>
+        <button type="button" class="btn-outline-sm" (click)="loadJobs()">
+          <span class="material-symbols-rounded">refresh</span>
+          Refresh
+        </button>
+      </div>
+
+      <div class="hero-kpis">
+        <article class="hero-kpi" *ngFor="let stat of stats">
+          <span class="material-symbols-rounded">{{ stat.icon }}</span>
+          <strong>{{ stat.value | number }}</strong>
+          <small>{{ stat.label }}</small>
+        </article>
+      </div>
+
+      <div class="hero-spotlight" *ngIf="featuredJobs.length; else noSpotlight">
+        <span class="hero-spotlight__company">{{ featuredJobs[0].companyName || 'Hiring company' }}</span>
+        <h3>{{ featuredJobs[0].title }}</h3>
+        <div class="hc-stat-row">
+          <span><span class="material-symbols-rounded">location_on</span>{{ featuredJobs[0].location || 'Flexible' }}</span>
+          <span><span class="material-symbols-rounded">payments</span>{{ salaryLabel(featuredJobs[0]) }}</span>
+        </div>
+        <a [routerLink]="['/jobs', featuredJobs[0].jobId]" class="btn-primary">
+          View Signal
+          <span class="material-symbols-rounded">arrow_forward</span>
+        </a>
+      </div>
+
+      <ng-template #noSpotlight>
+        <div class="empty-state">
+          <span class="material-symbols-rounded">{{ isLoading ? 'hourglass_top' : 'work_off' }}</span>
+          <p>{{ isLoading ? 'Refreshing active roles...' : 'No active roles are available right now.' }}</p>
+        </div>
+      </ng-template>
+    </aside>
+  </section>
+
+  <section class="hc-home-band hc-glass" *ngIf="topCategories.length">
+    <div class="hc-page-header">
+      <div>
+        <span class="hc-eyebrow">Demand map</span>
+        <h2>Explore roles by growing categories</h2>
+        <p>See where companies are hiring now and jump straight into openings that match your goals.</p>
+      </div>
+    </div>
+
+    <div class="category-grid">
+      <button class="category-card hc-glass" type="button" *ngFor="let category of topCategories" (click)="searchCategory(category.name)">
+        <span class="material-symbols-rounded">{{ category.icon }}</span>
+        <strong>{{ category.name }}</strong>
+        <small>{{ category.count | number }} {{ category.count === 1 ? 'role' : 'roles' }}</small>
+      </button>
+    </div>
+  </section>
+
+  <section class="hc-home-jobs hc-glass">
+    <div class="hc-page-header">
+      <div>
+        <span class="hc-eyebrow">Fresh openings</span>
+        <h2>Featured roles ready for your next move</h2>
+        <p>Review current openings, scan key details, and open the roles that fit your search.</p>
+      </div>
+      <a routerLink="/jobs" class="btn-outline">
+        All roles
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </a>
+    </div>
+
+    <div class="jobs-grid" *ngIf="featuredJobs.length; else emptyJobs">
+      <article class="job-card hc-glass" *ngFor="let job of featuredJobs; trackBy: trackByJobId">
+        <div class="job-card__head">
+          <div class="company-mark" *ngIf="!job.companyLogo">{{ companyInitial(job) }}</div>
+          <img *ngIf="job.companyLogo" [src]="job.companyLogo" [alt]="job.companyName + ' logo'" class="company-logo">
+          <div>
+            <h3>{{ job.title }}</h3>
+            <p>{{ job.companyName || 'Hiring company' }}</p>
+          </div>
+        </div>
+
+        <div class="hc-stat-row">
+          <span><span class="material-symbols-rounded">location_on</span>{{ job.location || 'Flexible' }}</span>
+          <span><span class="material-symbols-rounded">business_center</span>{{ formatJobType(job.jobType) }}</span>
+          <span><span class="material-symbols-rounded">payments</span>{{ salaryLabel(job) }}</span>
+        </div>
+
+        <div class="skill-list" *ngIf="job.skills.length">
+          <span class="pill" *ngFor="let skill of job.skills.slice(0, 3)">{{ skill }}</span>
+        </div>
+
+        <a [routerLink]="['/jobs', job.jobId]" class="btn-primary">
+          Open role
+          <span class="material-symbols-rounded">open_in_new</span>
+        </a>
+      </article>
+    </div>
+
+    <ng-template #emptyJobs>
+      <div class="empty-state">
+        <span class="material-symbols-rounded">{{ isLoading ? 'hourglass_top' : 'work_off' }}</span>
+        <h3>{{ isLoading ? 'Loading opportunities' : 'No active jobs yet' }}</h3>
+        <p>{{ isLoading ? 'Pulling live openings from the platform.' : 'New recruiter posts will appear here automatically.' }}</p>
+      </div>
+    </ng-template>
+  </section>
+
+  <section class="hc-home-snapshot hc-glass" *ngIf="topCompanies.length || topLocations.length || topJobTypes.length">
+    <div class="hc-page-header">
+      <div>
+        <span class="hc-eyebrow">Live snapshot</span>
+        <h2>Where hiring is clustering right now</h2>
+        <p>Track active companies, locations, and work patterns before narrowing your job search.</p>
+      </div>
+    </div>
+
+    <div class="workflow-grid">
+      <article class="hc-glass" *ngIf="topCompanies.length">
+        <span class="material-symbols-rounded">apartment</span>
+        <h3>Companies hiring</h3>
+        <p *ngFor="let company of topCompanies">{{ company.name }} <strong>{{ company.count }}</strong></p>
+      </article>
+      <article class="hc-glass" *ngIf="topLocations.length">
+        <span class="material-symbols-rounded">location_on</span>
+        <h3>Locations in motion</h3>
+        <p *ngFor="let location of topLocations">{{ location.name }} <strong>{{ location.count }}</strong></p>
+      </article>
+      <article class="hc-glass" *ngIf="topJobTypes.length">
+        <span class="material-symbols-rounded">schedule</span>
+        <h3>Work patterns</h3>
+        <p *ngFor="let type of topJobTypes">{{ type.name }} <strong>{{ type.count }}</strong></p>
+      </article>
+    </div>
+  </section>
+</main>

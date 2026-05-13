@@ -1,0 +1,366 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div>
+      <p class="eyebrow">Candidate Workspace</p>
+      <h1>My Profile</h1>
+      <p>Keep your candidate profile polished so recruiters can quickly understand your fit.</p>
+    </div>
+    <button type="button" class="btn-primary" *ngIf="!isLoading && !isEditing" (click)="startEditing()">
+      Edit Profile
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading profile...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !isEditing">
+    <section class="profile-hero">
+      <div class="avatar-mark">{{ getProfileInitials() }}</div>
+      <div class="hero-copy">
+        <h2>{{ getDisplayValue(profile?.fullName, 'Candidate profile') }}</h2>
+        <p>{{ getDisplayValue(profile?.currentDesignation, 'Designation not added') }}</p>
+        <div class="hero-tags">
+          <span>{{ getDisplayValue(profile?.experience, '0') }} yrs experience</span>
+          <span>{{ getPrimaryLocation() }}</span>
+          <span>{{ profile?.isOpenToRemote ? 'Open to remote' : 'Remote preference not added' }}</span>
+        </div>
+      </div>
+      <a *ngIf="profile?.resumeUrl" class="btn-outline" [href]="getResumeUrl(profile?.resumeUrl)" target="_blank">View Resume</a>
+    </section>
+
+    <div class="profile-layout">
+      <section class="profile-section">
+        <div class="section-title">
+          <h2>Contact Details</h2>
+          <p>Basic information recruiters use to reach you.</p>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span>Email</span>
+            <strong>{{ getDisplayValue(profile?.email) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span>Mobile</span>
+            <strong>{{ getDisplayValue(profile?.mobile) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span>Date of Birth</span>
+            <strong>{{ profile?.dob ? (profile?.dob | date:'mediumDate') : 'Not added' }}</strong>
+          </div>
+          <div class="detail-item">
+            <span>Gender</span>
+            <strong>{{ getDisplayValue(profile?.gender) }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="profile-section">
+        <div class="section-title">
+          <h2>Career Snapshot</h2>
+          <p>Your current role and job preferences.</p>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span>Current Company</span>
+            <strong>{{ getDisplayValue(profile?.currentCompany) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span>Expected Salary</span>
+            <strong>{{ getCurrencyValue(profile?.expectedSalary) }}</strong>
+          </div>
+          <div class="detail-item">
+            <span>Notice Period</span>
+            <strong>{{ profile?.noticePeriodDays !== null && profile?.noticePeriodDays !== undefined ? profile?.noticePeriodDays + ' days' : 'Not added' }}</strong>
+          </div>
+          <div class="detail-item">
+            <span>Remote Work</span>
+            <strong>{{ profile?.isOpenToRemote ? 'Yes' : 'Not marked' }}</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="profile-section">
+      <div class="section-title">
+        <h2>Profile Summary</h2>
+        <p>Candidate-facing introduction.</p>
+      </div>
+      <p class="summary-text">{{ getDisplayValue(profile?.summary, 'Add a short summary to help recruiters quickly understand your experience and goals.') }}</p>
+    </section>
+
+    <section class="profile-section">
+      <div class="section-title">
+        <h2>Skills & Locations</h2>
+        <p>Core capabilities and preferred work locations.</p>
+      </div>
+      <div class="tag-group" *ngIf="profile?.skills?.length; else noSkills">
+        <span class="pill" *ngFor="let skill of profile?.skills">{{ skill }}</span>
+      </div>
+      <ng-template #noSkills>
+        <p class="muted">No skills added</p>
+      </ng-template>
+
+      <div class="tag-group locations" *ngIf="profile?.preferredLocations?.length; else noLocations">
+        <span class="pill secondary" *ngFor="let location of profile?.preferredLocations">{{ location }}</span>
+      </div>
+      <ng-template #noLocations>
+        <p class="muted compact">No preferred locations added</p>
+      </ng-template>
+    </section>
+
+    <div class="profile-layout">
+      <section class="profile-section">
+        <div class="section-title">
+          <h2>Links</h2>
+          <p>Professional profiles and portfolio references.</p>
+        </div>
+        <div class="link-row">
+          <a *ngIf="profile?.linkedinUrl" [href]="getProfileUrl(profile?.linkedinUrl)" target="_blank" rel="noopener">LinkedIn</a>
+          <a *ngIf="profile?.githubUrl" [href]="getProfileUrl(profile?.githubUrl)" target="_blank" rel="noopener">GitHub</a>
+          <a *ngIf="profile?.portfolioUrl" [href]="getProfileUrl(profile?.portfolioUrl)" target="_blank" rel="noopener">Portfolio</a>
+          <span *ngIf="!profile?.linkedinUrl && !profile?.githubUrl && !profile?.portfolioUrl">No links added</span>
+        </div>
+      </section>
+
+      <section class="profile-section">
+        <div class="section-title">
+          <h2>Addresses</h2>
+          <p>Saved candidate addresses.</p>
+        </div>
+        <div class="address-list" *ngIf="profile?.addresses?.length; else noAddresses">
+          <div class="address-read-card" *ngFor="let address of profile?.addresses">
+            <strong>{{ getDisplayValue(address.addressType, 'Address') }}</strong>
+            <p>{{ formatAddress(address) }}</p>
+          </div>
+        </div>
+        <ng-template #noAddresses>
+          <p class="muted">No address added</p>
+        </ng-template>
+      </section>
+    </div>
+  </ng-container>
+
+  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading && isEditing">
+    <div class="profile-section">
+      <div class="section-title">
+        <h2>Basic Information</h2>
+        <p>Update your identity and contact details.</p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" formControlName="fullName" placeholder="Enter your full name">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" formControlName="email" placeholder="your.email@example.com">
+        </div>
+        <div class="form-group">
+          <label>Mobile</label>
+          <input type="tel" formControlName="mobile" placeholder="Enter mobile number">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date of Birth</label>
+          <input type="date" formControlName="dob" [max]="maxDob">
+          <small class="error" *ngIf="dob?.errors?.['futureDate'] && dob?.touched">Date of birth cannot be in the future</small>
+        </div>
+        <div class="form-group">
+          <label>Gender</label>
+          <select formControlName="gender">
+            <option value="">Select gender</option>
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="section-title">
+        <h2>Resume</h2>
+        <p>Upload a PDF resume recruiters can review.</p>
+      </div>
+
+      <div class="resume-section">
+        <div class="resume-info" *ngIf="profile?.resumeUrl">
+          <span>Resume uploaded</span>
+          <a [href]="getResumeUrl(profile?.resumeUrl)" target="_blank" class="btn-outline-sm">View</a>
+        </div>
+        <div class="upload-area">
+          <input type="file" id="resume" accept=".pdf" (change)="onFileSelected($event)" style="display: none;">
+          <label for="resume" class="upload-label">
+            <span>Upload new resume</span>
+            <small>PDF only</small>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="section-title">
+        <h2>Skills</h2>
+        <p>Add the skills recruiters should match you against.</p>
+      </div>
+
+      <div formArrayName="skills">
+        <div class="skills-list">
+          <span class="skill-tag" *ngFor="let skill of skills.controls; let i = index">
+            {{ skill.value }}
+            <button type="button" class="remove-skill" (click)="removeSkill(i)">x</button>
+          </span>
+        </div>
+        <div class="add-skill">
+          <input #skillInput type="text" placeholder="Add a skill">
+          <button type="button" class="btn-add" (click)="addSkill(skillInput.value); skillInput.value = ''">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="section-title">
+        <h2>Career Details</h2>
+        <p>Update your current role, expectations, and public links.</p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Experience (Years)</label>
+          <input type="number" min="0" formControlName="experience" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Current Company</label>
+          <input type="text" formControlName="currentCompany" placeholder="Company name">
+        </div>
+        <div class="form-group">
+          <label>Current Designation</label>
+          <input type="text" formControlName="currentDesignation" placeholder="Your role">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Expected Salary</label>
+          <input type="number" min="0" formControlName="expectedSalary" placeholder="Expected salary">
+        </div>
+        <div class="form-group">
+          <label>Notice Period (Days)</label>
+          <input type="number" min="0" formControlName="noticePeriodDays" placeholder="Notice period">
+        </div>
+      </div>
+
+      <div class="form-group checkbox">
+        <label>
+          <input type="checkbox" formControlName="isOpenToRemote">
+          Open to remote work
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Profile Summary</label>
+        <textarea formControlName="summary" rows="4" placeholder="Briefly describe your background and goals"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>LinkedIn URL</label>
+          <input type="url" formControlName="linkedinUrl" placeholder="https://linkedin.com/in/username">
+        </div>
+        <div class="form-group">
+          <label>GitHub URL</label>
+          <input type="url" formControlName="githubUrl" placeholder="https://github.com/username">
+        </div>
+        <div class="form-group">
+          <label>Portfolio URL</label>
+          <input type="url" formControlName="portfolioUrl" placeholder="https://your-site.com">
+        </div>
+      </div>
+
+      <div formArrayName="preferredLocations">
+        <label>Preferred Locations</label>
+        <div class="skills-list">
+          <span class="skill-tag" *ngFor="let location of preferredLocations.controls; let i = index">
+            {{ location.value }}
+            <button type="button" class="remove-skill" (click)="removePreferredLocation(i)">x</button>
+          </span>
+        </div>
+        <div class="add-skill">
+          <input #locationInput type="text" placeholder="Add a location">
+          <button type="button" class="btn-add" (click)="addPreferredLocation(locationInput.value); locationInput.value = ''">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Addresses</h2>
+          <p>Maintain saved home or work addresses.</p>
+        </div>
+        <button type="button" class="btn-add-section" (click)="addAddress()">Add Address</button>
+      </div>
+
+      <div formArrayName="addresses">
+        <div class="address-card" *ngFor="let addr of addresses.controls; let i = index" [formGroupName]="i">
+          <button type="button" class="btn-remove" (click)="removeAddress(i)">x</button>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>House/Apt No.</label>
+              <input type="text" formControlName="houseNo" placeholder="House/Apartment number">
+            </div>
+            <div class="form-group">
+              <label>Street</label>
+              <input type="text" formControlName="street" placeholder="Street name">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" formControlName="city" placeholder="City">
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" formControlName="state" placeholder="State">
+            </div>
+            <div class="form-group">
+              <label>Pincode</label>
+              <input type="number" formControlName="pincode" placeholder="Postal code">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Country</label>
+              <input type="text" formControlName="country" placeholder="Country">
+            </div>
+            <div class="form-group">
+              <label>Address Type</label>
+              <select formControlName="addressType">
+                <option value="HOME">Home</option>
+                <option value="WORK">Work</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-outline" (click)="cancelEditing()" [disabled]="isSaving">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </form>
+</div>
